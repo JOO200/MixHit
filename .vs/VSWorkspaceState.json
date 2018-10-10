@@ -2,10 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\MixHit",
-    "\\MixHit\\src\\mixer",
-    "\\MixHit\\src\\mixer\\collections",
-    "\\MixHit\\src\\web",
-    "\\MixHit\\src\\web\\sites"
+    "\\MixHit\\src",
+    "\\MixHit\\src\\web"
   ],
   "SelectedNode": "\\MixHit\\MixHit.vcxproj",
   "PreviewInSolutionExplorer": false

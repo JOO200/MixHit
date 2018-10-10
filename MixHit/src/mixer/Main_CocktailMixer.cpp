@@ -13,7 +13,6 @@
 
 #include "Main_CocktailMixer.h"
 
-
 cCocktailMixer gCocktailMixer;
 bool LogActive = false;
 
