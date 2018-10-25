@@ -81,9 +81,7 @@
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
 #include <Arduino.h>
-#include <SPI.h>
-
-#define MFRC522_SPICLOCK SPI_CLOCK_DIV4			// MFRC522 accept upto 10MHz
+#include <Wire.h>
 
 // Firmware data for self-test
 // Reference values based on firmware version
@@ -138,13 +136,16 @@ const byte FM17522_firmware_reference[] PROGMEM = {
 	0x56, 0x9A, 0x98, 0x82, 0x26, 0xEA, 0x2A, 0x62
 };
 
+#define I2CADDR 00001010
+#define I2CADDR 00001011
+
 class MFRC522 {
 public:
 	// Size of the MFRC522 FIFO
-	static const byte FIFO_SIZE = 64;		// The FIFO is 64 bytes.
+	static constexpr byte FIFO_SIZE = 64;		// The FIFO is 64 bytes.
 	// Default value for unused pin
 	static constexpr uint8_t UNUSED_PIN = UINT8_MAX;
-
+	
 	// MFRC522 registers. Described in chapter 9 of the datasheet.
 	// When using SPI all addresses are shifted one bit left in the "SPI address byte" (section 8.1.2.3)
 	enum PCD_Register : byte {
@@ -327,15 +328,13 @@ public:
 	} MIFARE_Key;
 	
 	// Member variables
-	Uid uid;								// Used by PICC_ReadCardSerial().
+	Uid uid;	// Used by PICC_ReadCardSerial().
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Functions for setting up the Arduino
 	/////////////////////////////////////////////////////////////////////////////////////
-	MFRC522();
-	DEPRECATED_MSG("use MFRC522(byte chipSelectPin, byte resetPowerDownPin)")
-	MFRC522(byte resetPowerDownPin);
-	MFRC522(byte chipSelectPin, byte resetPowerDownPin);
+	MFRC522(byte chipAddress, byte resetPowerDownPin);
+
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Basic interface functions for communicating with the MFRC522
@@ -352,8 +351,6 @@ public:
 	// Functions for manipulating the MFRC522
 	/////////////////////////////////////////////////////////////////////////////////////
 	void PCD_Init();
-	DEPRECATED_MSG("use PCD_Init(byte chipSelectPin, byte resetPowerDownPin)")
-	void PCD_Init(byte resetPowerDownPin);
 	void PCD_Init(byte chipSelectPin, byte resetPowerDownPin);
 	void PCD_Reset();
 	void PCD_AntennaOn();
@@ -363,10 +360,16 @@ public:
 	bool PCD_PerformSelfTest();
 	
 	/////////////////////////////////////////////////////////////////////////////////////
+	// Power control functions
+	/////////////////////////////////////////////////////////////////////////////////////
+	void PCD_SoftPowerDown();
+	void PCD_SoftPowerUp();
+	
+	/////////////////////////////////////////////////////////////////////////////////////
 	// Functions for communicating with PICCs
 	/////////////////////////////////////////////////////////////////////////////////////
-	StatusCode PCD_TransceiveData(byte *sendData, byte sendLen, byte *backData, byte *backLen, byte *validBits = NULL, byte rxAlign = 0, bool checkCRC = false);
-	StatusCode PCD_CommunicateWithPICC(byte command, byte waitIRq, byte *sendData, byte sendLen, byte *backData = NULL, byte *backLen = NULL, byte *validBits = NULL, byte rxAlign = 0, bool checkCRC = false);
+	StatusCode PCD_TransceiveData(byte *sendData, byte sendLen, byte *backData, byte *backLen, byte *validBits = nullptr, byte rxAlign = 0, bool checkCRC = false);
+	StatusCode PCD_CommunicateWithPICC(byte command, byte waitIRq, byte *sendData, byte sendLen, byte *backData = nullptr, byte *backLen = nullptr, byte *validBits = nullptr, byte rxAlign = 0, bool checkCRC = false);
 	StatusCode PICC_RequestA(byte *bufferATQA, byte *bufferSize);
 	StatusCode PICC_WakeupA(byte *bufferATQA, byte *bufferSize);
 	StatusCode PICC_REQA_or_WUPA(byte command, byte *bufferATQA, byte *bufferSize);
@@ -393,12 +396,10 @@ public:
 	// Support functions
 	/////////////////////////////////////////////////////////////////////////////////////
 	StatusCode PCD_MIFARE_Transceive(byte *sendData, byte sendLen, bool acceptTimeout = false);
-	// old function used too much memory, now name moved to flash; if you need char, copy from flash to memory
-	//const char *GetStatusCodeName(byte code);
-	static const __FlashStringHelper *GetStatusCodeName(StatusCode code);
 	static PICC_Type PICC_GetType(byte sak);
-	// old function used too much memory, now name moved to flash; if you need char, copy from flash to memory
-	//const char *PICC_GetTypeName(byte type);
+	
+	// Support functions for debuging - proxy for MFRC522Debug to keep backwarts compatibility
+	static const __FlashStringHelper *GetStatusCodeName(StatusCode code);
 	static const __FlashStringHelper *PICC_GetTypeName(PICC_Type type);
 	
 	// Support functions for debuging
@@ -410,14 +411,7 @@ public:
 	void PICC_DumpMifareUltralightToSerial();
 	
 	// Advanced functions for MIFARE
-	DEPRECATED_MSG("name will change in next version")
 	void MIFARE_SetAccessBits(byte *accessBitBuffer, byte g0, byte g1, byte g2, byte g3);
-	DEPRECATED_MSG("will move to extra class in next version")
-	bool MIFARE_OpenUidBackdoor(bool logErrors);
-	DEPRECATED_MSG("will move to extra class in next version")
-	bool MIFARE_SetUid(byte *newUid, byte uidSize, bool logErrors);
-	DEPRECATED_MSG("will move to extra class in next version")
-	bool MIFARE_UnbrickUidSector(bool logErrors);
 	
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Convenience functions - does not add extra functionality
@@ -426,8 +420,13 @@ public:
 	virtual bool PICC_ReadCardSerial();
 	
 protected:
-	byte _chipSelectPin;		// Arduino pin connected to MFRC522's SPI slave select input (Pin 24, NSS, active low)
+	// Pins
+	byte _chipAddress;
 	byte _resetPowerDownPin;	// Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
+	
+
+	
+	// Functions for communicating with MIFARE PICCs
 	StatusCode MIFARE_TwoStepHelper(byte command, byte blockAddr, int32_t data);
 };
 

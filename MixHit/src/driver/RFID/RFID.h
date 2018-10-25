@@ -1,20 +1,19 @@
-#ifndef _CMAGNETSENSOR_H_
-#define _CMAGNETSENSOR_H_
+#ifndef _RFID_H_
+#define _RFID_H_
 
-#include "../mixer/Configuration.h"
-#include "I2C.h"
-#include "MFRC522.h"
-
+//#include "../mixer/Configuration.h"
+//#include "I2C.h"
+#include "C:\Users\Soeren\Documents\GitHub\MixHit\MixHit\src\driver\RFID\LL\MFRC522.h"
 
 struct RfidData
 {
-	uint8_t[4]  UID;
-	uint8_t[2]  Bestellnummer;
+	uint8_t  UID[4];
+	uint8_t  Bestellnummer[2];
 	uint8_t     CocktailNr;
 	uint8_t     Status;
-	uint8_t[8]  mlProFlasche;
-	uint8_t[16] Name;
-	uint8_t[5]  LieferDatum;
+	uint8_t  mlProFlasche[8];
+	uint8_t Name[16];
+	uint8_t  LieferDatum[5];
 	uint8_t     CRC;
 };
 
@@ -38,7 +37,7 @@ private:
 	uint8_t adr = 0;
 	uint16_t intPin = 0;
 	
-}
+};
 
 
 

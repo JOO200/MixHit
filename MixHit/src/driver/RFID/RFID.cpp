@@ -2,8 +2,8 @@
 
 RFID::RFID(uint16_t intPin)
 {
-	pinMode(intPin, INPUT_PULLUP); // Pullup?
-	attachInterrupt(digitalPinToInterrupt(intPin), handleInterrupt, FALLING); //check edge and create int function!
+	//pinMode(intPin, INPUT_PULLUP); // Pullup?
+	//attachInterrupt(digitalPinToInterrupt(intPin), handleInterrupt, FALLING); //check edge and create int function!
 
 
 }
