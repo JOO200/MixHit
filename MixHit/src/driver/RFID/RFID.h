@@ -7,23 +7,21 @@
 
 struct RfidData
 {
-	uint8_t  UID[4];
-	uint8_t  Bestellnummer[2];
-	uint8_t     CocktailNr;
-	uint8_t     Status;
-	uint8_t  mlProFlasche[8];
-	uint8_t Name[16];
-	uint8_t  LieferDatum[5];
-	uint8_t     CRC;
+	uint32_t  Bestellnummer;
+	uint16_t  CocktailNr;
+	uint16_t  Status;
+	uint16_t  mlProFlasche[8];
+	uint8_t  Name[16];
+	uint8_t  NameCocktail[32];
+	uint8_t  LieferDatum[8];
+	uint8_t  CRC;
 };
 
 
-class RFID
+class RFID: public MFRC522
 {
 public:
-	RFID(uint16_t intPin);
-	RFID(uint8_t adr, uint16_t intPin);
-	~RFID();
+
 
 	bool tagAvailable();			
 	bool writeData(RfidData data);
@@ -36,7 +34,8 @@ public:
 private:
 	uint8_t adr = 0;
 	uint16_t intPin = 0;
-	
+	MIFARE_Key key;
+	MIFARE_Key SecretKey;
 };
 
 
