@@ -3,13 +3,15 @@
 
 //#include "../mixer/Configuration.h"
 //#include "I2C.h"
-#include "C:\Users\Soeren\Documents\GitHub\MixHit\MixHit\src\driver\RFID\LL\MFRC522.h"
+#include "LL/MFRC522.h"
+
+#define THRESHOLD_BIG_SMALL_COCKTAIL 200		// Threshold for cocktail size: over -> big cocktail, under -> small cocktail;
 
 struct RfidData
 {
-	uint32_t  Bestellnummer;
+	uint32_t  Bestellnummer;		
 	uint16_t  CocktailNr;
-	uint16_t  Status;
+	uint16_t  Status;					// use the upper 8 bits to determine the priority of the cocktail (0, 1, 2)
 	uint16_t  mlProFlasche[8];
 	uint8_t  Name[16];
 	uint8_t  NameCocktail[32];
@@ -26,8 +28,9 @@ public:
 	bool tagAvailable();			
 	bool writeData(RfidData data);
 	bool readData(RfidData &data);
-	bool getDrinkStatus(uint8_t status);
+	bool getDrinkStatus(void /*uint8_t status*/);
 	bool setDrinkStatus(uint8_t status);
+	bool addDrinkToMixerQueue(RfidData &data);
 
 
 

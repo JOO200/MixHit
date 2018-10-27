@@ -10,7 +10,7 @@ cIngredient::cIngredient(String pName, int pAmount)
 {
 	mName = pName;
 	mAmount = pAmount;
-	mRelAmount = 0; // Relative Maenge wird vorerst mit 0 initialisiert und spaeter richtig pestimmt.
+	mRelAmount = 0; // Relative Maenge wird vorerst mit 0 initialisiert und spaeter richtig bestimmt.
 }
 String cIngredient::getName()
 {

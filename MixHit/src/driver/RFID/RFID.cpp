@@ -1,4 +1,6 @@
 #include "RFID.h"
+#include "../MixHit/src/mixer/cCocktailMixer.h"		//include Queue of Orders class to wrap RFID data
+
 
 
 bool RFID::tagAvailable()
@@ -96,17 +98,17 @@ bool RFID::readData(RfidData & data)
 	return true;
 }
 
-bool RFID::getDrinkStatus(uint8_t status)
+bool RFID::getDrinkStatus(void /*uint8_t status*/)		// pk: changed parameter to void to avoid collision with StatusCode auth_status (formerly status) in namespace 
 {
-	StatusCode status;
+	StatusCode auth_status;
 	uint8_t buffer[18];
 	uint8_t size = sizeof(buffer);
 	//Get Data from Sector 2 This sector has a special key for access restriction! The key is hardcoded.
-	status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &SecretKey, &(uid));
-	if (status != STATUS_OK)
+	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &SecretKey, &(uid));
+	if (auth_status != STATUS_OK)
 		return false;
-	status = (StatusCode)MIFARE_Read(8, &buffer[0], &size);
-	if (status != STATUS_OK)
+	auth_status = (StatusCode)MIFARE_Read(8, &buffer[0], &size);
+	if (auth_status != STATUS_OK)
 		return false;
 	PCD_StopCrypto1();
 
@@ -119,4 +121,92 @@ bool RFID::setDrinkStatus(uint8_t status)
 
 
 	return false;
+}
+
+bool RFID::addDrinkToMixerQueue(RfidData &data)
+{
+	String CocktailName = "";
+	vector<String> CocktailNames;
+	vector<int> IngriedentsAmounts;
+	int OrderedAmount;						// 1: half, 2: full
+	int OrderPrio = (data.Status & 0xFF);	// get the upper 8 bits of status
+	int recvdOrderNr;
+	int total_ml = 0;
+	extern cCocktailMixer gCocktailMixer;
+
+	//Precautions
+	for (int i = 0; i < 32; i++)			// combine the 32 name fields of the RFID tag
+	{
+		CocktailName += String(data.NameCocktail[i]).c_str();
+	}
+
+	for (int i = 0; i < 8; i++)					// create the vectors
+	{
+		if (data.mlProFlasche != 0)				// if the ingredient gets used in this cocktail
+		{
+			switch (i)							// check which reservoir is looked at currently
+			{
+			case 0:
+				CocktailNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));	// hand over the amount of ingredient
+				break;
+			case 1:
+				CocktailNames.push_back("Maracuja");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			case 2:
+				CocktailNames.push_back("Malibu");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			case 3:
+				CocktailNames.push_back("Wodka");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			case 4:
+				CocktailNames.push_back("Zitrone");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			case 5:
+				CocktailNames.push_back("Grenadine");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			case 6:
+				CocktailNames.push_back("Orange");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			case 7:
+				CocktailNames.push_back("Banane");
+				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				break;
+			}
+		}
+	}
+
+	for (int i = 0; i < 8; i++)				// calculate if the order was a big or small cocktail
+	{
+		total_ml += data.mlProFlasche[i];
+	}
+
+	total_ml < THRESHOLD_BIG_SMALL_COCKTAIL ? OrderedAmount = 1 : OrderedAmount = 2;
+
+	//Step 1: wrap RFID data in Cocktail class structure
+	cCocktail lCocktail(CocktailName,		// name of cocktail
+		CocktailNames,						// names of ingridients
+		IngriedentsAmounts);
+
+	//Step 2: create an cOrder-object out of lCocktail
+	cOrder lOrder(lCocktail,				// cCocktail-object
+		OrderedAmount,						// amount
+		OrderPrio);							// determine the priority queue
+
+	//Step 3: add order to global mixer queue
+	recvdOrderNr = gCocktailMixer.addOrderToQueue(lOrder);
+
+	if(recvdOrderNr == -1)
+		return false;						// could not place order
+	else
+	{
+		data.Bestellnummer = (uint32_t)recvdOrderNr;
+		return true;						//write received order and return
+	}
 }

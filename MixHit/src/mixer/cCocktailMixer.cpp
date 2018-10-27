@@ -27,6 +27,8 @@ int cCocktailMixer::addOrderToQueue(cOrder pBestellung)
 	pBestellung.setOrderNumber(lOrderNumber);
 	mNextOrderNumber++;			// Naechste moegliche Bestellnummer berechnen.
 	bool ReturnValue = mQueue[pBestellung.getPrio()].addOrder(pBestellung); // Bestellung ggf. der Warteschlange hinzufuegen (false, falls Liste bereits voll).
+
+
 	MyMutex_mQueue_unlock();	// Bereich wieder freigeben
 	if (ReturnValue)
 	{
