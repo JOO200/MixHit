@@ -26,8 +26,8 @@ public:
 	bool tagAvailable();			
 	bool writeData(RfidData data);
 	bool readData(RfidData &data);
-	bool getDrinkStatus();
-	bool setDrinkStatus();
+	bool getDrinkStatus(uint8_t status);
+	bool setDrinkStatus(uint8_t status);
 
 
 
