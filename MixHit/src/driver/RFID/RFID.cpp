@@ -206,7 +206,7 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 		return false;						// could not place order
 	else
 	{
-		data.Bestellnummer = (uint32_t)recvdOrderNr;
+		data.CocktailNr = (uint32_t)recvdOrderNr;
 		return true;						//write received order and return
 	}
 }
