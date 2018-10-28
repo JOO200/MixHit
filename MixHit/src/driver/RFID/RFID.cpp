@@ -14,8 +14,6 @@ bool RFID::writeData(RfidData data)
 	StatusCode status;
 	uint8_t Sector0Buffer[32];
 	uint8_t Sector1Buffer[48];
-	uint8_t Sector2Buffer[16];
-
 	//Sort uint32 into 4 uint8 for transfer
 	for (int i = 0; i < 4; i++) {
 		Sector0Buffer[i] = (uint8_t)(data.Bestellnummer >> 8 * (3 - i) && 0x000000FF); 
@@ -32,15 +30,35 @@ bool RFID::writeData(RfidData data)
 	memcpy(&Sector0Buffer[16], &data.mlProFlasche[0],16);
 
 	memcpy(&Sector1Buffer[0], &data.Name[0], 16);
-	memcpy(&Sector1Buffer[16], &data.NameCocktail, 32);
-	memcpy(&Sector2Buffer, &data.Status, 2);
+	memcpy(&Sector1Buffer[16], &data.NameCocktail[0], 32);
+
+	// Authenticate using key B
+	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 3, &stdKey, &(mfrc522.uid));
+	if (status != MFRC522::STATUS_OK) {
+		return false;
+	}
+	for (int i = 0; i < 2; i++) {
+		status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(i+2, &Sector0Buffer[i*16], 16);
+		if (status != MFRC522::STATUS_OK) {
+			return false;
+		}
+	}
+
+	// Authenticate using key B
+	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 3, &stdKey, &(mfrc522.uid));
+	if (status != MFRC522::STATUS_OK) {
+		return false;
+	}
+	for (int i = 0; i < 3; i++) {
+		status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(i+4, &Sector1Buffer[i*16], 16);
+		if (status != MFRC522::STATUS_OK) {
+			return false;
+		}
+	}
 
 
-	status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &key, &(uid));
 
-
-
-	return false;
+	return true;
 }
 
 bool RFID::readData(RfidData & data)
@@ -54,7 +72,7 @@ bool RFID::readData(RfidData & data)
 
 	//Get Data from Sector 0
 	StatusCode status;
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &key, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &stdKey, &(uid));
 	if (status != STATUS_OK)
 		return false;
 	status = (StatusCode) MIFARE_Read(1, &MiscBuffer[0], &size);
@@ -65,7 +83,7 @@ bool RFID::readData(RfidData & data)
 		return false;
 	PCD_StopCrypto1();
 	//Get Data from Sector 1
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, &key, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, &stdKey, &(uid));
 	if (status != STATUS_OK)
 		return false;
 	status = (StatusCode) MIFARE_Read(4, &NameBuffer[0], &size);
@@ -104,7 +122,7 @@ bool RFID::getDrinkStatus(void /*uint8_t status*/)		// pk: changed parameter to 
 	uint8_t buffer[18];
 	uint8_t size = sizeof(buffer);
 	//Get Data from Sector 2 This sector has a special key for access restriction! The key is hardcoded.
-	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &SecretKey, &(uid));
+	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &secretKey, &(uid));
 	if (auth_status != STATUS_OK)
 		return false;
 	auth_status = (StatusCode)MIFARE_Read(8, &buffer[0], &size);
@@ -113,14 +131,24 @@ bool RFID::getDrinkStatus(void /*uint8_t status*/)		// pk: changed parameter to 
 	PCD_StopCrypto1();
 
 
-	return false;
+	return true;
 }
 
 bool RFID::setDrinkStatus(uint8_t status)
 {
+	uint8_t[16] temp;
+	memcpy(&temp, 0, 16);
+	// Authenticate using key B
+	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 11, &secretKey, &(mfrc522.uid));
+	if (status != MFRC522::STATUS_OK) {
+		return false;
+	}
+	status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(8, &temp[0], 1);
+	if (status != MFRC522::STATUS_OK) {
+		return false;
+	}
 
-
-	return false;
+	return true;
 }
 
 bool RFID::addDrinkToMixerQueue(RfidData &data)
