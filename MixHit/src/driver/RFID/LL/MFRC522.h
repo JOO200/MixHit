@@ -329,7 +329,8 @@ public:
 	
 	// Member variables
 	Uid uid;	// Used by PICC_ReadCardSerial().
-	
+	MIFARE_Key stdKey;
+	MIFARE_Key secretKey;
 	/////////////////////////////////////////////////////////////////////////////////////
 	// Functions for setting up the Arduino
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -423,8 +424,7 @@ protected:
 	// Pins
 	byte _chipAddress;
 	byte _resetPowerDownPin;	// Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
-	MIFARE_Key stdKey;
-	MIFARE_Key secretKey;
+
 
 	
 	// Functions for communicating with MIFARE PICCs

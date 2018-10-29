@@ -16,7 +16,6 @@ struct RfidData
 	uint8_t  Name[16];
 	uint8_t  NameCocktail[32];
 	uint8_t  LieferDatum[8];
-	uint8_t  CRC;
 };
 
 
@@ -28,8 +27,9 @@ public:
 	bool tagAvailable();			
 	bool writeData(RfidData data);
 	bool readData(RfidData &data);
-	bool getDrinkStatus(void /*uint8_t status*/);
+	bool getDrinkStatus(uint8_t &status);
 	bool setDrinkStatus(uint8_t status);
+	bool changeSecretKey();
 	bool addDrinkToMixerQueue(RfidData &data);
 
 
@@ -37,8 +37,6 @@ public:
 private:
 	uint8_t adr = 0;
 	uint16_t intPin = 0;
-	MIFARE_Key key;
-	MIFARE_Key SecretKey;
 };
 
 

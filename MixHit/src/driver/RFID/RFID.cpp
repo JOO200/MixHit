@@ -9,6 +9,11 @@ bool RFID::tagAvailable()
 	return false;
 }
 
+/**
+This function writes the RfidData struct to the RFID tag.
+RFID tag needs to be detected first.
+*/
+
 bool RFID::writeData(RfidData data)
 {
 	StatusCode status;
@@ -28,38 +33,39 @@ bool RFID::writeData(RfidData data)
 	}
 	//Transfer of ml array
 	memcpy(&Sector0Buffer[16], &data.mlProFlasche[0],16);
-
 	memcpy(&Sector1Buffer[0], &data.Name[0], 16);
 	memcpy(&Sector1Buffer[16], &data.NameCocktail[0], 32);
 
 	// Authenticate using key B
-	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 3, &stdKey, &(mfrc522.uid));
-	if (status != MFRC522::STATUS_OK) {
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &stdKey, &(uid));
+	if (status != STATUS_OK) {
 		return false;
 	}
 	for (int i = 0; i < 2; i++) {
-		status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(i+2, &Sector0Buffer[i*16], 16);
-		if (status != MFRC522::STATUS_OK) {
+		status = (StatusCode) MIFARE_Write(i+2, &Sector0Buffer[i*16], 16);
+		if (status != STATUS_OK) {
 			return false;
 		}
 	}
-
 	// Authenticate using key B
-	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 3, &stdKey, &(mfrc522.uid));
-	if (status != MFRC522::STATUS_OK) {
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &stdKey, &(uid));
+	if (status != STATUS_OK) {
 		return false;
 	}
 	for (int i = 0; i < 3; i++) {
-		status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(i+4, &Sector1Buffer[i*16], 16);
-		if (status != MFRC522::STATUS_OK) {
+		status = (StatusCode) MIFARE_Write(i+4, &Sector1Buffer[i*16], 16);
+		if (status != STATUS_OK) {
 			return false;
 		}
 	}
-
-
-
 	return true;
 }
+
+/**
+* This function reads data from the RFID tag and returns it as ref param.
+* 
+* 
+*/
 
 bool RFID::readData(RfidData & data)
 {
@@ -68,34 +74,34 @@ bool RFID::readData(RfidData & data)
 	uint8_t MiscBuffer[36];
 	uint8_t NameBuffer[18];
 	uint8_t CocktailNameBuffer[36];
-	uint8_t size = 18; // var for the read command to check buffer size. Buffer is always large enougth!
+	uint8_t size = 18; // var for the read command to check buffer size. Buffer is always large enougth! The two last bytes are a checksum
 
 	//Get Data from Sector 0
 	StatusCode status;
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &stdKey, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 3, &stdKey, &(uid)); //Authenticate at sector 0
 	if (status != STATUS_OK)
 		return false;
-	status = (StatusCode) MIFARE_Read(1, &MiscBuffer[0], &size);
+	status = (StatusCode) MIFARE_Read(1, &MiscBuffer[0], &size);   //Read sector 0
 	if (status != STATUS_OK)
 		return false;
-	status = (StatusCode) MIFARE_Read(2, &MiscBuffer[18], &size);
+	status = (StatusCode) MIFARE_Read(2, &MiscBuffer[18], &size);  //Read sector 1
 	if (status != STATUS_OK)
 		return false;
-	PCD_StopCrypto1();
+	PCD_StopCrypto1(); //Stop encrytion for sector 0
 	//Get Data from Sector 1
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, &stdKey, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, &stdKey, &(uid)); //Authenticate at sector 1
 	if (status != STATUS_OK)
 		return false;
-	status = (StatusCode) MIFARE_Read(4, &NameBuffer[0], &size);
+	status = (StatusCode) MIFARE_Read(4, &NameBuffer[0], &size);  //Read sector 4
 	if (status != STATUS_OK)
 		return false;
-	status = (StatusCode) MIFARE_Read(5, &CocktailNameBuffer[0], &size);
+	status = (StatusCode) MIFARE_Read(5, &CocktailNameBuffer[0], &size); //Read sector 5
 	if (status != STATUS_OK)
 		return false;
-	status = (StatusCode) MIFARE_Read(6, &CocktailNameBuffer[0], &size);
+	status = (StatusCode) MIFARE_Read(6, &CocktailNameBuffer[0], &size); //Read sector 6
 	if (status != STATUS_OK)
 		return false;
-	PCD_StopCrypto1();
+	PCD_StopCrypto1(); //Stop the encrytion
 
 
 
@@ -116,8 +122,7 @@ bool RFID::readData(RfidData & data)
 	return true;
 }
 
-bool RFID::getDrinkStatus(void /*uint8_t status*/)		// pk: changed parameter to void to avoid collision with StatusCode auth_status (formerly status) in namespace 
-{
+bool RFID::getDrinkStatus(uint8_t &status)		{
 	StatusCode auth_status;
 	uint8_t buffer[18];
 	uint8_t size = sizeof(buffer);
@@ -125,28 +130,57 @@ bool RFID::getDrinkStatus(void /*uint8_t status*/)		// pk: changed parameter to 
 	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &secretKey, &(uid));
 	if (auth_status != STATUS_OK)
 		return false;
-	auth_status = (StatusCode)MIFARE_Read(8, &buffer[0], &size);
+	auth_status = (StatusCode)MIFARE_Read(8, &buffer[0], &size); //Read the whole sector
 	if (auth_status != STATUS_OK)
 		return false;
 	PCD_StopCrypto1();
-
+	status = buffer[0]; //pass the status byte
 
 	return true;
 }
 
+
 bool RFID::setDrinkStatus(uint8_t status)
 {
-	uint8_t[16] temp;
-	memcpy(&temp, 0, 16);
-	// Authenticate using key B
-	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B, 11, &secretKey, &(mfrc522.uid));
-	if (status != MFRC522::STATUS_OK) {
+	uint8_t temp[16];
+	memcpy(&temp[0], 0, 16); //add the status byte
+	std::fill(&temp[2], &temp[16], 0); //Fill the array with zeros
+	// Authenticate using key A
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &secretKey, &(uid));
+	if (status != STATUS_OK) {
 		return false;
 	}
-	status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(8, &temp[0], 1);
-	if (status != MFRC522::STATUS_OK) {
+	status = (StatusCode) MIFARE_Write(8, &temp[0], 16);
+	if (status != STATUS_OK) {
 		return false;
 	}
+	PCD_StopCrypto1();
+
+	return true;
+}
+
+bool RFID::changeSecretKey() {
+
+	StatusCode auth_status;
+	uint8_t buffer[16];
+	memcpy(&buffer[0], &secretKey.keyByte[0], 6);
+	buffer[6] = 0xFF; // Access bits setup (need keyA for all functions (read/write)
+	buffer[7] = 0x07;
+	buffer[8] = 0x80;
+	buffer[9] = 0x69;
+	for (int i = 10; i < 16; i++) {
+		buffer[i] = 0xFF;
+	}
+
+	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &stdKey, &(uid));
+	if (auth_status != STATUS_OK) {
+		return false;
+	}
+	auth_status = (StatusCode)MIFARE_Write(11, &buffer[0], 16);
+	if (auth_status != STATUS_OK) {
+		return false;
+	}
+	PCD_StopCrypto1();
 
 	return true;
 }
