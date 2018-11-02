@@ -2,11 +2,8 @@
   "ExpandedNodes": [
     "",
     "\\MixHit",
-    "\\MixHit\\src",
-    "\\MixHit\\src\\driver",
-    "\\MixHit\\src\\driver\\RFID",
-    "\\MixHit\\src\\driver\\RFID\\LL"
+    "\\MixHit\\src"
   ],
-  "SelectedNode": "\\MixHit\\src\\driver\\RFID\\LL\\MFRC522.h",
+  "SelectedNode": "\\MixHit\\src\\remote",
   "PreviewInSolutionExplorer": false
 }

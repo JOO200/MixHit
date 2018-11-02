@@ -352,7 +352,7 @@ public:
 	// Functions for manipulating the MFRC522
 	/////////////////////////////////////////////////////////////////////////////////////
 	void PCD_Init();
-	void PCD_Init(byte chipSelectPin, byte resetPowerDownPin);
+	void PCD_Init(byte chipAddress, byte resetPowerDownPin);
 	void PCD_Reset();
 	void PCD_AntennaOn();
 	void PCD_AntennaOff();
@@ -422,7 +422,7 @@ public:
 	
 protected:
 	// Pins
-	byte _chipAddress;
+	byte _chipAddress = 0x28;
 	byte _resetPowerDownPin;	// Arduino pin connected to MFRC522's reset and power down input (Pin 6, NRSTPD, active low)
 
 

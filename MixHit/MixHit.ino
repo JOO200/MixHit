@@ -12,10 +12,12 @@
 #include "WiFi.h"
 #include "src/mixer/Main_CocktailMixer.h"
 #include "src/web/Main_WebServer.h"
+#include "src/driver/RFID/RFID.h"
 
 void loop_1(void * pvParameters);
 void loop_2(void * pvParameters);
 void loop_3(void * pvParameters);
+void loop_4(void * pvParameters);
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -78,6 +80,7 @@ void setup()
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
 	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
+	//xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, NULL, 0);
 }
 
 // the loop function runs over and over again until power down or reset
@@ -110,4 +113,23 @@ void loop_3(void * pvParameters)
 	{
 		loop_OLED();
 	}
+}
+void loop_4(void * pvParameters)
+{
+
+	// GPIO expander and OLED driver have already initialized the i2c bus
+	RFID rfid1(RFID_READER_ADDR, RFID_READER_RST);
+	rfid1.PCD_Init();   // Init MFRC522
+
+	// check reade version
+	byte version = rfid1.PCD_ReadRegister(rfid1.VersionReg);
+	if (version != 0x91 || version != 0x92) {
+		if (version == 0x00 || version == 0xFF) {
+			Serial.println("RFID reader does not respond!");
+		}
+		Serial.println("RFID reader version unknown!");
+	}
+
+		loop_RFID(rfid1);
+
 }

@@ -11,11 +11,11 @@ struct RfidData
 {
 	uint32_t  Bestellnummer;		
 	uint16_t  CocktailNr;
-	uint16_t  Status;					// use the upper 8 bits to determine the priority of the cocktail (0, 1, 2)
+	uint8_t  Status;					// use the upper 8 bits to determine the priority of the cocktail (0, 1, 2)
 	uint16_t  mlProFlasche[8];
 	uint8_t  Name[16];
 	uint8_t  NameCocktail[32];
-	uint8_t  LieferDatum[8];
+	uint8_t  LieferDatum[7];
 };
 
 
@@ -23,7 +23,8 @@ class RFID: public MFRC522
 {
 public:
 
-
+	//using MFRC522::MFRC522;
+	RFID(byte chipAddress, byte resetPowerDownPin) : MFRC522(chipAddress,resetPowerDownPin) {};
 	bool tagAvailable();			
 	bool writeData(RfidData data);
 	bool readData(RfidData &data);

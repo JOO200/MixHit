@@ -18,7 +18,7 @@ bool LogActive = false;
 
 void setup_CocktailMixer()
 {
-	#ifndef LoadFile
+#ifndef LoadFile
 	String lConfigFileName = "";
 	readFile(SPIFFS, "/Config_Select.txt", &lConfigFileName); // Liest ein, welche Config-Datei geladen werden soll.
 	if (lConfigFileName == "")
@@ -29,20 +29,20 @@ void setup_CocktailMixer()
 	writeFile(SPIFFS, "/Config_Select.txt", "/Default_Config.txt");	// Zur�cksetzen auf Default (dass falls die aktuelle Config beschaedigt ist, nach einem Reset wieder die Default geladen wird - Damit der Controler nicht staendeig die fehlerhafte Datei laed und resetet).
 	LoadConfigFile(lConfigFileName);
 	writeFile(SPIFFS, "/Config_Select.txt", lConfigFileName); // Falls beim Laden alles in Ordnung war (und das Programm nicht abstuerzt) wird die Config_Select wieder auf den Urspruenglichen Wert gesetzt.
-	#endif	
-	#ifndef REGON_Menue
+#endif	
+#ifndef REGON_Menue
 	create_Menue();
 	Serial.println("Menue_OK");
-	#endif
-	#ifndef REGION_SparkFun
+#endif
+#ifndef REGION_SparkFun
 	Init_SparkFun();
 	Serial.println("SparkFun_OK");
-	#endif
-	#ifndef REGION_PinModes
+#endif
+#ifndef REGION_PinModes
 	AttacheInterrupts();
 	//AttacheInterrupts(); // Aktiviert die Interrupts und legt die PinModes fest.
 	Serial.println("Interrupts_OK");
-	#endif
+#endif
 	gCocktailMixer.mServo.goToPosition_Close();
 }
 
@@ -54,16 +54,16 @@ void loop_CocktailMixer()
 		Serial.println("$ACCLOG\r");
 		LogActive = true;
 	}*/
-	#ifndef REGION_SwitchMachineStates
-	#ifndef Global_To_Local_EVA_Prinzip
+#ifndef REGION_SwitchMachineStates
+#ifndef Global_To_Local_EVA_Prinzip
 	static int lMachineState = MachineState_OK;
 	static int lOldMachineState = MachineState_OK;
 	lMachineState = getMachineState(); // globale Variable lokal Speichern, damit diese sich lokal waehrend diesem Durchlauf nicht mehr aendert.
 	lOldMachineState = getOldMachineState(); // globale Variable lokal Speichern, damit diese sich lokal waehrend diesem Durchlauf nicht mehr aendert.
-	#ifndef REGION_StartStoppTaster
+#ifndef REGION_StartStoppTaster
 	if (digitalRead(PinONOFF) == 1)
 	{ // Falls der Stop-Taster offen ist, bzw. ein Drahtbruch vorliegt, liegt am Pin ein High-Signal an (wegen internem PullUp). In diesem Fall liegt ein Fehler vor.
-		
+
 		STOP_Mode = true; // Falls der Stop-Taster auf Stopp steht, kann die Maschine nicht weiter bedient werden.
 		setMachineState(MachineState_ERROR_NotAus);
 		lMachineState = MachineState_ERROR_NotAus;
@@ -73,34 +73,34 @@ void loop_CocktailMixer()
 	{ // Falls der Stop-Taster nicht auf Stopp steht
 		if (lMachineState == MachineState_ERROR_NotAus)
 		{ // Falls die Maschine aktuell im Stopp-Modus ist, wird diese nun wieder in den Zustand OK gesetzt, damit diese nun wieder bedient werden kann.
-			
+
 			lMachineState = MachineState_OK;
 			setMachineState(MachineState_OK);
 			gOLED.PrintFirstLine("");
 		}
 		STOP_Mode = false;
 	}
-	#endif
-	#endif
+#endif
+#endif
 	if (lMachineState >= 0) // Prueft ob ein Fehler vorliegt oder nicht. (< 0 sind Fehler).
 	{
 		if (lOldMachineState < 0)
 		{ // Fals der letzte Zustand ein Fehlerzustand war, wird nun die Fehlermeldung auf dem Display aufgehoben.
 			gOLED.PrintFirstLine("");
 		}
-		#ifndef REGION_NormalMode
+#ifndef REGION_NormalMode
 		if (CheckNormalMode())
 		{
 			gCocktailMixer.mixNextCocktail();
 		}
-		#endif
-		#ifndef REGION_ResetESP
+#endif
+#ifndef REGION_ResetESP
 		if (lMachineState == MachineState_Reset)
 		{
 			ESP.restart();
 		}
-		#endif
-		#ifndef REGION_Werkseinstellungen
+#endif
+#ifndef REGION_Werkseinstellungen
 		if (lMachineState == MachineState_Einstellungen_Werkseinstellung)
 		{
 			gOLED.PrintFirstLine("Werkseinstellung laden...");
@@ -120,15 +120,15 @@ void loop_CocktailMixer()
 			//writeFile(SPIFFS, "/Config_Select.wtxt", "/Default_Config.wtxt"); // Default_Config als zu ladende Datei festlegen
 			ESP.restart(); // Neustart
 		}
-		#endif
-		#ifndef REGION_Betriebsmodus
+#endif
+#ifndef REGION_Betriebsmodus
 		if (lMachineState == MachineState_Betriebsmodus)
 		{
 			gOLED.PrintFirstLine("");
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_InitAll
+#endif
+#ifndef REGION_InitAll
 		if (lMachineState == MachineState_Einstellungen_InitAll)
 		{
 			if (gCocktailMixer.InitIngredients() == gCocktailMixer.mReservoir.getNumberOfReservoir())
@@ -137,8 +137,8 @@ void loop_CocktailMixer()
 			}
 			setMachineState(MachineState_Einstellungen);
 		}
-		#endif
-		#ifndef REGION_InitSingle
+#endif
+#ifndef REGION_InitSingle
 		if (lMachineState >= MachineState_Einstellungen_InitSingle && lMachineState < MachineState_Einstellungen_InitSingle + MaxNumberOfReservoir)
 		{
 			if (gCocktailMixer.InitIngredient(lMachineState - MachineState_Einstellungen_InitSingle) >= 0)
@@ -147,8 +147,8 @@ void loop_CocktailMixer()
 			}
 			setMachineState(MachineState_Einstellungen);
 		}
-		#endif
-		#ifndef REGION_TestMode_RotateTableR
+#endif
+#ifndef REGION_TestMode_RotateTableR
 		if (lMachineState == MachineState_TestMode_RotateTableR)
 		{
 			gCocktailMixer.mRotateTable.mMotor.MotorStartR();
@@ -177,8 +177,8 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		#endif
-		#ifndef REGION_TestMode_RotateTableL
+#endif
+#ifndef REGION_TestMode_RotateTableL
 		if (lMachineState == MachineState_TestMode_RotateTableL)
 		{
 			gCocktailMixer.mRotateTable.mMotor.MotorStartL();
@@ -207,8 +207,8 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		#endif
-		#ifndef REGION_TestMode_Valve
+#endif
+#ifndef REGION_TestMode_Valve
 		if (lMachineState == MachineState_TestMode_Valve)
 		{ // Falls die Ventile getestet werden sollen.
 			for (int i = 0; i < MaxNumberOfReservoir; i++)
@@ -219,8 +219,8 @@ void loop_CocktailMixer()
 			gOLED.PrintFirstLine("Geschlossen");
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_TestMode_ValveOpen
+#endif
+#ifndef REGION_TestMode_ValveOpen
 		if (lMachineState == MachineState_TestMode_ValveOpen)
 		{ // Falls die Ventile getestet werden sollen.
 			for (int i = 0; i < MaxNumberOfReservoir; i++)
@@ -240,8 +240,8 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		#endif
-		#ifndef REGION_TestMode_Scale_Tare
+#endif
+#ifndef REGION_TestMode_Scale_Tare
 		if (lMachineState == MachineState_TestMode_ScaleTare)
 		{
 			gCocktailMixer.mScale.Tare();
@@ -251,8 +251,8 @@ void loop_CocktailMixer()
 			setMachineState(MachineState_TestMode_Scale);
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_TestMode_Scale
+#endif
+#ifndef REGION_TestMode_Scale
 		if (lMachineState == MachineState_TestMode_Scale)
 		{
 			Serial.println("Scale_Now");
@@ -261,27 +261,27 @@ void loop_CocktailMixer()
 			gOLED.PrintFirstLine("Gewicht: " + String(Scale_Weight) + "g"); // Anzeigen des Gewichtes in der ersten Zeile des Displays
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_TestMode_Servo0
+#endif
+#ifndef REGION_TestMode_Servo0
 		if (lMachineState == MachineState_TestMode_Servo0)
 		{
 			gCocktailMixer.mServo.goToPosition_Close();
 		}
-		#endif
-		#ifndef REGION_TestMode_RotateTableL
+#endif
+#ifndef REGION_TestMode_RotateTableL
 		if (lMachineState == MachineState_TestMode_Servo1)
 		{
 			gCocktailMixer.mServo.goToPosition_Open();
 		}
-		#endif
-		#ifndef REGION_TestMode
+#endif
+#ifndef REGION_TestMode
 		if (lMachineState == MachineState_TestMode)
 		{ // Falls der TestModus aktiv ist, aber nichts ausgewaehlt wurde.
 			gOLED.PrintFirstLine("Test_Mode");
 			CloseValvesStopMotor(); // Alle Ventile schlie�en udn Motor stoppen.
 			delay(100);
 		}
-		#endif
+#endif
 	}
 	else
 	{ // Falls ein Fehler vorliegt.
@@ -295,18 +295,18 @@ void loop_CocktailMixer()
 			gMenue.selectMenueItem(lSelectedPath_0, 1);
 			gMenue.mSelectedMenueItem->mSelectedIndex = 0; // mSelectedIndex auf 0 setzen.
 			MyMutex_MenueItems_unlock(); // Bereich wieder freigeben.
-			
+
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
 		delay(100);
 	}
 	delay(100);
-	#endif
+#endif
 }
 void loop_OLED()
 {
-	#ifndef REGION_Serielle_Menue_Navigation
+#ifndef REGION_Serielle_Menue_Navigation
 	// Falls keine Taster zum Steuern fuer das Menue vorhanden sind, kann das Menue ueber die Serielle Schnittstelle gesteuert werden.
 	if (Serial.available() > 0)
 	{
@@ -329,10 +329,10 @@ void loop_OLED()
 			gMenue.BACK();
 		}
 	}
-	#endif
+#endif
 
 	int lMachineState = getMachineState(); // globale Variable lokal Speichern, damit diese sich lokal waehrend diesem Durchlauf nicht mehr aendert.
-	#ifndef REGION_Bestellnummern
+#ifndef REGION_Bestellnummern
 	if (lMachineState == MachineState_NormalMode_Bestellnummern)
 	{ // 
 		DettacheInterrupts(); // Interrupts verhindern
@@ -353,8 +353,8 @@ void loop_OLED()
 		AttacheInterrupts(); // Interrupts aktivieren
 		delay(100);
 	}
-	#endif
-	#ifndef REGION_Statistik
+#endif
+#ifndef REGION_Statistik
 	if (lMachineState >= 0)
 	{
 		if (lMachineState == MachineState_NormalMode_Statistik)
@@ -388,12 +388,64 @@ void loop_OLED()
 		gMenue.mSelectedMenueItem->mSelectedIndex = 0; // mSelectedIndex auf 0 setzen.
 		MyMutex_MenueItems_unlock(); // Bereich wieder freigeben.
 	}
-	#endif
+#endif
 
 	gMenue.showMenue(); // Informationen des Menues an Display uebergeben
 	gOLED.DisplayLines(); // Informationen anzeigen.
 	delay(100); // TODO: Testen, ob der delay Auswirkungen auf den Webserver hat.
 
+}
+
+void loop_RFID(RFID rfid1)
+{
+	RfidData readData;
+	bool status = false;
+	RFID::Uid lastUID;
+
+	while (true) {
+
+		if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standy mode (not halt mode)
+			
+
+			if (!rfid1.PICC_ReadCardSerial()) {
+				//read failed. do sth
+			}
+			bool uidIdentical = true;
+			for(int i = 0; i<rfid1.uid.size;i++){ //compare last RFID tag to new RFID tag. Prevent reading the same tag.
+				if (lastUID.uidByte[i] != rfid1.uid.uidByte[i])
+					uidIdentical = false;
+			}
+			if (uidIdentical) { //exit function if uid is identical (prevent reading the same tag)
+				return;
+			}
+
+			lastUID = rfid1.uid;
+
+			if (!rfid1.getDrinkStatus(readData.Status)) {
+				//read failed. so sth
+			}
+			if (readData.Status = 0xFF) {
+				if (!rfid1.readData(readData)) {
+					//read failed. do sth
+				}
+				if (!rfid1.addDrinkToMixerQueue(readData)) {
+					//read failed. do sth
+				}
+				if (!rfid1.setDrinkStatus(0x00)) {
+					//read failed. do sth
+				}
+
+			}
+			else {
+				gCocktailMixer.mRotateTable.goToNextPosition(); //rotate table one position w/o filling the glass
+			}
+
+
+		}
+		rfid1.PCD_StopCrypto1(); //Stop communication with Tag
+	}
+
+	vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
 }
 
 
@@ -482,7 +534,7 @@ void LoadConfigFile(String pFileName)
 	{
 		Line = vector<String>(); // Line leeren. (damit keine Eintraege mehr vorhanden sind)
 		Counter++;
-		#ifndef REGION_Select
+#ifndef REGION_Select
 		// Hier wird geprueft, an welcher Stelle in der Datei man sich befindet, damit man weiss, was mit dem Inhalt anzufangen ist.
 		if (Lines[i] == "Vorrarsbehaelter")
 		{
@@ -519,7 +571,7 @@ void LoadConfigFile(String pFileName)
 			Serial.println(SelectIndex);
 			Counter = -2; // -2: "Cocktails_Alkoholfrei", -1: Erleuterungen; 0: Erster Eintrag welcher zu verwerten ist.
 		}
-		#endif
+#endif
 
 		if (SelectIndex == 0 && Counter >= 0)
 		{ // Vorratsbehaelter
@@ -556,7 +608,7 @@ void LoadConfigFile(String pFileName)
 		{ // Cocktails alkoholisch
 			// Zeilenaufbau: Cocktailname; Zutat_1; Menge_1; Zutat_2; Menge_2; ...
 			split(&Lines[i], ';', &Line); // Zeileninhalt trennen
-			
+
 			vector<String> lNames;
 			vector<int> lAmount;
 			for (int i = 0; i < (Line.size() - 1) / 2; i++)
@@ -646,7 +698,7 @@ void create_Menue()
 	Serial.println("MixHit_0 - Einstellungen_0");
 	gMenue.selectMenueItem(lSelectedPath_00, 2);
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Fuellmaengen", NO_OPERATION));
-	
+
 	Serial.println("MixHit_0 - Einstellungen_0 - Fuellmaengen_1");
 	int lSelectedPath_001[] = { 0, 0, 1 }; // MixHit_0 - Einstellungen_0 - Fuellmaengen_1
 	gMenue.selectMenueItem(lSelectedPath_001, 3);
@@ -723,7 +775,7 @@ void create_Menue()
 	int lSelectedPath_01[] = { 0, 1 }; // MixHit_0 - Betriebsmodus_1
 	gMenue.selectMenueItem(lSelectedPath_01, 2);
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Normalbetrieb", NormalMode));
-	
+
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Normalbetrieb_0");
 	int lSelectedPath_010[] = { 0, 1, 0 }; // MixHit_0 - Betriebsmodus_1 - Normalbetrieb_0
 	gMenue.selectMenueItem(lSelectedPath_010, 3);
@@ -810,7 +862,7 @@ void create_Menue()
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Komponententest_1");
 	gMenue.selectMenueItem(lSelectedPath_011, 3);
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Waage", TestMode_Scale));
-	
+
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Komponententest_1 - Waage_2");
 	int lSelectedPath_0112[] = { 0, 1, 1, 2 }; // MixHit_0 - Betriebsmodus_1 - Komponententest_1 - Valve_1
 	gMenue.selectMenueItem(lSelectedPath_0112, 4);
@@ -847,7 +899,7 @@ void refreshReservoirInfo()
 	for (int i = 0; i < Lines.size(); i++)
 	{
 		Counter++;
-		#ifndef REGION_Select
+#ifndef REGION_Select
 		// Hier wird geprueft, an welcher Stelle in der Datei man sich befindet, damit man weiss, was mit dem Inhalt anzufangen ist.
 		if (Lines[i] == "Vorrarsbehaelter")
 		{
@@ -860,7 +912,7 @@ void refreshReservoirInfo()
 		{ // Sobald der Inhalt Glaeser ist, sind alle Vorratsbehaelter vorbei und es kann abgebrochen werden.
 			break;
 		}
-		#endif
+#endif
 
 		if (SelectIndex == 0 && Counter >= 0)
 		{ // Vorratsbehaelter

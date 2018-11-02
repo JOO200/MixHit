@@ -21,12 +21,8 @@ MFRC522::MFRC522(	byte chipAddress,
 				) {
 	_chipAddress = chipAddress;
 	_resetPowerDownPin = resetPowerDownPin;
-	for (byte i = 0; i < 6; i++) {
-		stdKey.keyByte[i] = 0xFF;
-	}
-	for (byte i = 0; i < 6; i++) {
-		secretKey.keyByte[i] = 0xFF-i;
-	}
+	// The standard key for all Tags
+
 
 
 } // End constructor
@@ -190,6 +186,14 @@ MFRC522::StatusCode MFRC522::PCD_CalculateCRC(	byte *data,		///< In: Pointer to 
 void MFRC522::PCD_Init() {
 	// Set the chipSelectPin as digital output, do not select the slave yet
 
+	for (byte i = 0; i < 6; i++) {
+		stdKey.keyByte[i] = 0xFF;
+	}
+	// Secret Key for the status sector
+	for (byte i = 0; i < 6; i++) {
+		secretKey.keyByte[i] = 0xFF-i;
+	}
+	
 	// Set the resetPowerDownPin as digital output, do not reset or power down.
 	pinMode(_resetPowerDownPin, OUTPUT);
 
