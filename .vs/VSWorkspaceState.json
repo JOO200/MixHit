@@ -6,8 +6,9 @@
     "\\MixHit\\src\\driver",
     "\\MixHit\\src\\driver\\RFID",
     "\\MixHit\\src\\libs",
-    "\\MixHit\\src\\mixer"
+    "\\MixHit\\src\\mixer",
+    "\\MixHit\\src\\mixer\\obj"
   ],
-  "SelectedNode": "\\MixHit\\src\\mixer\\cCocktailMixer.h",
+  "SelectedNode": "\\MixHit\\src\\mixer\\obj",
   "PreviewInSolutionExplorer": false
 }
