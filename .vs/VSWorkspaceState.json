@@ -2,8 +2,12 @@
   "ExpandedNodes": [
     "",
     "\\MixHit",
-    "\\MixHit\\src"
+    "\\MixHit\\src",
+    "\\MixHit\\src\\driver",
+    "\\MixHit\\src\\driver\\RFID",
+    "\\MixHit\\src\\libs",
+    "\\MixHit\\src\\mixer"
   ],
-  "SelectedNode": "\\MixHit\\src\\remote",
+  "SelectedNode": "\\MixHit\\src\\mixer\\cCocktailMixer.h",
   "PreviewInSolutionExplorer": false
 }
