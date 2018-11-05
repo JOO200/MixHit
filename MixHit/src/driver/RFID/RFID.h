@@ -26,11 +26,11 @@ public:
 	//using MFRC522::MFRC522;
 	RFID(byte chipAddress, byte resetPowerDownPin) : MFRC522(chipAddress,resetPowerDownPin) {};
 	bool tagAvailable();			
-	bool writeData(RfidData data);
-	bool readData(RfidData &data);
-	bool getDrinkStatus(uint8_t &status);
-	bool setDrinkStatus(uint8_t status);
-	bool changeSecretKey();
+	bool writeData(RfidData data, MIFARE_Key *stdKey);
+	bool readData(RfidData &data, MIFARE_Key *stdKey);
+	bool getDrinkStatus(uint8_t &status, MIFARE_Key *secretKey);
+	bool setDrinkStatus(uint8_t status, MIFARE_Key *secretKey);
+	bool changeSecretKey(MIFARE_Key *oldKey, MIFARE_Key *newKey);
 	bool addDrinkToMixerQueue(RfidData &data);
 
 

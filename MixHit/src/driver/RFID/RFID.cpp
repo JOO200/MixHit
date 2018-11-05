@@ -11,7 +11,7 @@
 
 bool RFID::tagAvailable()
 {
-	//Depends on Interrupt usage
+	//Unused
 	return false;
 }
 
@@ -20,14 +20,12 @@ This function writes the RfidData struct to the RFID tag.
 RFID tag needs to be detected first.
 */
 
-bool RFID::writeData(RfidData data)
+bool RFID::writeData(RfidData data, MIFARE_Key *stdKey)
 {
 	StatusCode status;
 	uint8_t Sector1Buffer[32];
 	uint8_t Sector2Buffer[48];
 	
-	MFRC522::MIFARE_Key key;
-	for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 	//Sort uint32 into 4 uint8 for transfer
 	for (int i = 0; i < 4; i++) {
 		Sector1Buffer[i] = (uint8_t)(data.Bestellnummer >> (8 * (3 - i))& 0x000000FF);
@@ -51,7 +49,7 @@ bool RFID::writeData(RfidData data)
 	memcpy(&Sector2Buffer[16], &data.NameCocktail[0], 32);
 	
 	// Authenticate using key A
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, &key, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, stdKey, &(uid));
 	if (status != STATUS_OK) {
 		return false;
 	}
@@ -63,7 +61,7 @@ bool RFID::writeData(RfidData data)
 	}
 
 	// Authenticate using key A
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &key, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, stdKey, &(uid));
 	if (status != STATUS_OK) {
 		return false;
 	}
@@ -82,10 +80,8 @@ bool RFID::writeData(RfidData data)
 * 
 */
 
-bool RFID::readData(RfidData & data)
+bool RFID::readData(RfidData & data, MIFARE_Key *stdKey)
 {
-	MFRC522::MIFARE_Key key;
-  for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
 
 	//temporary buffers for all data (data has checksums which we want to remove)
 	uint8_t MiscBuffer[36];
@@ -95,7 +91,7 @@ bool RFID::readData(RfidData & data)
 
 	//Get Data from Sector 0
 	StatusCode status;
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, &key, &(uid)); //Authenticate at sector 0
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, stdKey, &(uid)); //Authenticate at sector 0
 	if (status != STATUS_OK)
 		return false;
 	Serial.println("1");
@@ -107,7 +103,7 @@ bool RFID::readData(RfidData & data)
 		return false;
 	//PCD_StopCrypto1(); //Stop encrytion for sector 0
 	//Get Data from Sector 1
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, &key, &(uid)); //Authenticate at sector 1
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, stdKey, &(uid)); //Authenticate at sector 1
 	if (status != STATUS_OK)
 		return false;
 	Serial.println("Step4");
@@ -140,14 +136,12 @@ bool RFID::readData(RfidData & data)
 	return true;
 }
 
-bool RFID::getDrinkStatus(uint8_t &status)		{
+bool RFID::getDrinkStatus(uint8_t &status, MIFARE_Key *secretKey)		{
 	StatusCode auth_status;
 	uint8_t buffer[18];
 	uint8_t size = sizeof(buffer);
-	MFRC522::MIFARE_Key key2;
-	for (byte i = 0; i < 6; i++) key2.keyByte[i] = 0xFF-i;
 	//Get Data from Sector 2 This sector has a special key for access restriction! The key is hardcoded.
-	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, &key2, &(uid));
+	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, secretKey, &(uid));
 	if (auth_status != STATUS_OK)
 		return false;
 	auth_status = (StatusCode)MIFARE_Read(12, &buffer[0], &size); //Read the whole sector
@@ -159,15 +153,14 @@ bool RFID::getDrinkStatus(uint8_t &status)		{
 }
 
 
-bool RFID::setDrinkStatus(uint8_t status)
+bool RFID::setDrinkStatus(uint8_t status, MIFARE_Key *secretKey)
 {
-	MFRC522::MIFARE_Key key2;
-	for (byte i = 0; i < 6; i++) key2.keyByte[i] = 0xFF-i;
+
 
 	uint8_t temp[16];
 	temp[1] = status;
 	// Authenticate using key A
-	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, &key2, &(uid));
+	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, secretKey, &(uid));
 	if (status != STATUS_OK) {
 		return false;
 	}
@@ -179,17 +172,13 @@ bool RFID::setDrinkStatus(uint8_t status)
 	return true;
 }
 
-bool RFID::changeSecretKey() {
+bool RFID::changeSecretKey(MIFARE_Key *oldKey, MIFARE_Key *newKey) {
 
-	MFRC522::MIFARE_Key key1;
-	MFRC522::MIFARE_Key key2;
-	for (byte i = 0; i < 6; i++) key1.keyByte[i] = 0xFF;
-	for (byte i = 0; i < 6; i++) key2.keyByte[i] = 0xFF-i;
 
 	StatusCode auth_status;
 	uint8_t buffer[18];
 	uint8_t size = 16;
-	memcpy(&buffer[0], &key1.keyByte[0], 6);
+	memcpy(&buffer[0], newKey->keyByte[0], 6);
 	buffer[6] = 0xFF; // Access bits setup (need keyA for all functions (read/write)
 	buffer[7] = 0x07;
 	buffer[8] = 0x80;
@@ -199,7 +188,7 @@ bool RFID::changeSecretKey() {
 	}
 
 	//
-	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, &key2, &(uid));
+	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, oldKey, &(uid));
 	if (auth_status != STATUS_OK) {
 		return false;
 	}
@@ -207,11 +196,8 @@ bool RFID::changeSecretKey() {
 	if (auth_status != STATUS_OK) {
 		return false;
 	}
-	for(int i = 0; i<6;i++){
-		Serial.print(secretKey.keyByte[i]);
-	}
 	size+=2;
-	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, &key1, &(uid));
+	auth_status = (StatusCode)PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 15, newKey, &(uid));
 	if (auth_status != STATUS_OK) {
 		return false;
 	}
@@ -223,7 +209,7 @@ bool RFID::changeSecretKey() {
 }
 
 bool RFID::addDrinkToMixerQueue(RfidData &data)
-{
+{/*
 	String CocktailName = "";
 	vector<String> CocktailNames;
 	vector<int> IngriedentsAmounts;
@@ -307,5 +293,5 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 	{
 		data.CocktailNr = (uint32_t)recvdOrderNr;
 		return true;						//write received order and return
-	}
+	}*/
 }

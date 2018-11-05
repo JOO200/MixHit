@@ -401,6 +401,13 @@ void loop_RFID(RFID rfid1)
 	RfidData readData;
 	bool status = false;
 	RFID::Uid lastUID;
+	RFID::MIFARE_Key stdKey;
+	RFID::MIFARE_Key secretKey;
+
+	for (int i = 0; i < 6; i++) {
+		stdKey.keyByte[i] = 0xFF;
+		secretKey.keyByte[i] = 0xFF - i;
+	}
 
 	while (true) {
 
@@ -421,17 +428,17 @@ void loop_RFID(RFID rfid1)
 
 			lastUID = rfid1.uid;
 
-			if (!rfid1.getDrinkStatus(readData.Status)) {
+			if (!rfid1.getDrinkStatus(readData.Status,&secretKey)) {
 				//read failed. so sth
 			}
 			if (readData.Status = 0xFF) {
-				if (!rfid1.readData(readData)) {
+				if (!rfid1.readData(readData, &stdKey)) {
 					//read failed. do sth
 				}
 				if (!rfid1.addDrinkToMixerQueue(readData)) {
 					//read failed. do sth
 				}
-				if (!rfid1.setDrinkStatus(0x00)) {
+				if (!rfid1.setDrinkStatus(0x00, &secretKey)) {
 					//read failed. do sth
 				}
 
