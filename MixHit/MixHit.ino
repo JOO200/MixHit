@@ -125,9 +125,9 @@ void loop_4(void * pvParameters)
 	byte version = rfid1.PCD_ReadRegister(rfid1.VersionReg);
 	if (version != 0x91 || version != 0x92) {
 		if (version == 0x00 || version == 0xFF) {
-			Serial.println("RFID reader does not respond!");
+			Serial.println("RFID: reader does not respond!");
 		}
-		Serial.println("RFID reader version unknown!");
+		Serial.println("RFID: reader version unknown!");
 	}
 
 		loop_RFID(rfid1);
