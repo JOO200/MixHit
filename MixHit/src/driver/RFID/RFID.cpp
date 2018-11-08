@@ -181,7 +181,7 @@ bool RFID::changeSecretKey(MIFARE_Key *oldKey, MIFARE_Key *newKey) {
 	StatusCode auth_status;
 	uint8_t buffer[18];
 	uint8_t size = 16;
-	memcpy(&buffer[0], newKey->keyByte[0], 6);
+	memcpy(&buffer[0], &newKey->keyByte[0], 6);
 	buffer[6] = 0xFF; // Access bits setup (need keyA for all functions (read/write)
 	buffer[7] = 0x07;
 	buffer[8] = 0x80;

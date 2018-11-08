@@ -4,12 +4,12 @@
  Author:	User
 */
 
-#include <BluetoothSerial.h>
-#include <SPIFFS.h>
-#include <SparkFunSX1509.h>
-#include <Wire.h>
+//#include <BluetoothSerial.h>
+//#include <SPIFFS.h>
+//#include <SparkFunSX1509.h>
+//#include <Wire.h>
 #include <dummy.h>
-#include "WiFi.h"
+//#include "WiFi.h"
 #include "src/mixer/Main_CocktailMixer.h"
 #include "src/web/Main_WebServer.h"
 #include "src/driver/RFID/RFID.h"
