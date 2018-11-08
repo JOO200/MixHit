@@ -402,6 +402,13 @@ void loop_RFID(RFID rfid1)
 	RfidData readData;
 	eRFIDErrorcode status = RFID_OK;
 	RFID::Uid lastUID;
+	RFID::MIFARE_Key stdKey;
+	RFID::MIFARE_Key secretKey;
+
+	for (int i = 0; i < 6; i++) {
+		stdKey.keyByte[i] = 0xFF;
+		secretKey.keyByte[i] = 0xFF - i;
+	}
 
 	while (true) {
 
@@ -430,6 +437,21 @@ void loop_RFID(RFID rfid1)
 				status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
 			}
 
+<<<<<<< HEAD
+			if (!rfid1.getDrinkStatus(readData.Status,&secretKey)) {
+				//read failed. so sth
+			}
+			if (readData.Status = 0xFF) {
+				if (!rfid1.readData(readData, &stdKey)) {
+					//read failed. do sth
+				}
+				if (!rfid1.addDrinkToMixerQueue(readData)) {
+					//read failed. do sth
+				}
+				if (!rfid1.setDrinkStatus(0x00, &secretKey)) {
+					//read failed. do sth
+				}
+=======
 			if (status == RFID_OK && readData.Status == 0xFF) {
 				status = RFID_FWRONGSTATUS;		// error if readData.Status is set to FF -> check value FF again!
 			}
@@ -437,6 +459,7 @@ void loop_RFID(RFID rfid1)
 			if (status == RFID_OK && !rfid1.readData(readData)) {		// can't read complete dataset
 				status = RFID_FDATAREAD;
 			}
+>>>>>>> 9f8a572b725d584e525b8290e999f1f475d39488
 
 			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
 				status = RFID_FMIXERQUEUE;

@@ -5,10 +5,9 @@
     "\\MixHit\\src",
     "\\MixHit\\src\\driver",
     "\\MixHit\\src\\driver\\RFID",
-    "\\MixHit\\src\\libs",
-    "\\MixHit\\src\\mixer",
-    "\\MixHit\\src\\mixer\\obj"
+    "\\MixHit\\src\\driver\\RFID\\LL"
   ],
   "SelectedNode": "\\MixHit\\src\\mixer\\Main_CocktailMixer.cpp",
+  "SelectedNode": "\\MixHit\\src\\driver\\RFID\\LL\\MFRC522.cpp",
   "PreviewInSolutionExplorer": false
 }
