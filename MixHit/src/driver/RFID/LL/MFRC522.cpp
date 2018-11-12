@@ -7,7 +7,8 @@
 #include <Arduino.h>
 #include "MFRC522.h"
 #include "MFRC522Debug.h"
-#include "./src/libs/MyMutex.h"
+#include "src/libs/MyMutex.h"
+
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Functions for setting up the Arduino

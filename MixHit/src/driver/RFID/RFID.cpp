@@ -209,7 +209,7 @@ bool RFID::changeSecretKey(MIFARE_Key *oldKey, MIFARE_Key *newKey) {
 }
 
 bool RFID::addDrinkToMixerQueue(RfidData &data)
-{/*
+{
 	String CocktailName = "";
 	vector<String> CocktailNames;
 	vector<int> IngriedentsAmounts;
@@ -293,5 +293,5 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 	{
 		data.CocktailNr = (uint32_t)recvdOrderNr;
 		return true;						//write received order and return
-	}*/
+	}
 }

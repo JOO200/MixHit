@@ -293,7 +293,7 @@ int cCocktailMixer::mixNextCocktail()
 		else // Falls sich keine Bestellung in der Warteschlange mit der hoechsten Prioritaet befindet.
 		{
 			if (mQueue[1].getNumberOfOrders() > 0 && mQueue[0].getNumberOfOrders() > 0) // Falls sowohl in der Warteschlange mit mittlerer und mit niedrigster Prioritaet Bestellungen sind.
-			{   // Hier wird die Warteschlange mit mittlerer Prioritaet 3x heufiger bedient als die mit niedriger Prioritaet.
+			{   // Hier wird die Warteschlange mit mittlerer Prioritaet 3x haeufiger bedient als die mit niedriger Prioritaet.
 				// Wenn lCounter 0, 1, 2 ist wird die Warteschlange mit mittlerer Prioritaet bedient.
 				// Wenn lCounter 3 ist wird die mit niedriger Priotitaet bedient.
 				//static int lCounter = 0; // Mit 0 wird nur beim aller ersten mal aufrufen initialisiert, danach behaelt die Variable ihren Wert den sie nachfolgend zugewiesen bekommt, auch nach Verlasen der Funktion (static).
