@@ -422,11 +422,14 @@ void loop_RFID(RFID rfid1)
 			
 			if (status == RFID_OK)
 			{
+				status = RFID_OK;
+				byte z = 0;
 				for (int i = 0; i < rfid1.uid.size; i++) { //compare last RFID tag to new RFID tag. Prevent reading the same tag.
-					if (lastUID.uidByte[i] != rfid1.uid.uidByte[i])
-						//uidIdentical = false;
-						status = RFID_FUIDIDENTICAL;
+					if (lastUID.uidByte[i] == rfid1.uid.uidByte[i])
+						z++;
 				}
+				if (z == rfid1.uid.size)
+					status = RFID_FUIDIDENTICAL;
 			}
 
 			if (status == RFID_OK) { //exit function if uid is identical (prevent reading the same tag)
@@ -435,6 +438,7 @@ void loop_RFID(RFID rfid1)
 
 			if (status == RFID_OK && !rfid1.getDrinkStatus(readData.Status,&secretKey)) {
 				status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
+				Serial.println(readData.Status, HEX);
 			}
 
 			if (status == RFID_OK && readData.Status == 0xFF) {
@@ -455,6 +459,7 @@ void loop_RFID(RFID rfid1)
 			switch (status)
 			{
 			case RFID_OK:
+				Serial.println("RFID: Start table rotation");
 				gCocktailMixer.mRotateTable.goToNextPosition();		//rotate table one position w/o filling the glass
 				Serial.println("RFID: Read successfully");
 				break;
@@ -488,14 +493,16 @@ void loop_RFID(RFID rfid1)
 				break;
 
 			default:
+				Serial.println("Adding Drink to Mixer Queue");
 				break;
 			}
 
 			rfid1.PCD_StopCrypto1(); //Stop communication with Tag
 		}
+		vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
 	}
 
-	vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
+	
 }
 
 

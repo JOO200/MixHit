@@ -2,6 +2,7 @@
 
 cValveControl::cValveControl()
 {
+	MyMutex_I2C_lock(); // I2C fuer andere Threads sperren (da das OLED ebenfalls I2C verwendet).
 	Init_SparkFun();
 	for (int i = 0; i < MaxNumberOfReservoir; i++)
 	{
@@ -10,6 +11,7 @@ cValveControl::cValveControl()
 		io.pinMode(mValvePinNumbers[i], OUTPUT);
 		io.digitalWrite(mValvePinNumbers[i], LOW);
 	}
+	MyMutex_I2C_unlock(); // I2C freigeben
 	mFastMode = true; // Damit mehre Ventile gleichzeitig geoeffnet werden duerfen.
 }
 void cValveControl::setFastMode(bool pMode)

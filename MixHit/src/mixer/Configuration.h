@@ -71,7 +71,7 @@ extern const int PinSX1509Valve[MaxNumberOfReservoir];
 #define I2C_OLEDaddress 0x3C
 
 #define RFID_READER_ADDR 0x28
-#define RFID_READER_RST 99 //CHANGE THIS!
+#define RFID_READER_RST 15 //CHANGE THIS!
 
 
 #endif

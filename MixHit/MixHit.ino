@@ -80,7 +80,7 @@ void setup()
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
 	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
-	//xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, NULL, 0);
+	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, NULL, 0);
 }
 
 // the loop function runs over and over again until power down or reset
@@ -100,11 +100,11 @@ void loop_2(void * pvParameters)
 	while (true)
 	{
 		loop_WebServer();
-		if (WiFi.status() != WL_CONNECTED)
+		/*if (WiFi.status() != WL_CONNECTED)
 		{
 			delay(500);
 			setup_WebServer();
-		}
+		}*/
 	}
 }
 void loop_3(void * pvParameters)
@@ -123,13 +123,21 @@ void loop_4(void * pvParameters)
 
 	// check reade version
 	byte version = rfid1.PCD_ReadRegister(rfid1.VersionReg);
-	if (version != 0x91 || version != 0x92) {
+	Serial.print("RFID Reader Version:");
+	Serial.println(version,HEX);
+	if (version == (byte)0x92) {
+		loop_RFID(rfid1);
+		
+	}
+	else {
+		Serial.println("RFID: reader version unknown!");
 		if (version == 0x00 || version == 0xFF) {
 			Serial.println("RFID: reader does not respond!");
 		}
-		Serial.println("RFID: reader version unknown!");
 	}
 
-		loop_RFID(rfid1);
+	
+
+		
 
 }

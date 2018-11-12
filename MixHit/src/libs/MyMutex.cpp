@@ -29,6 +29,7 @@ bool interlockedExchange_1(bool v)
 }
 void MyMutex_mQueue_lock()
 {
+	
 	bool prev;
 	while (1)
 	{
@@ -101,6 +102,7 @@ bool interlockedExchange_4(bool v)
 }
 void MyMutex_I2C_lock()
 {
+	//Serial.println("MutexLocked");
 	bool prev;
 	while (1)
 	{
@@ -114,6 +116,7 @@ void MyMutex_I2C_lock()
 }
 void MyMutex_I2C_unlock()
 {
+	//Serial.println("Mutex Unlocked");
 	interlockedExchange_4(false);
 }
 

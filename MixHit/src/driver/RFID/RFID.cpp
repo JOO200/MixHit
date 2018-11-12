@@ -33,7 +33,6 @@ bool RFID::writeData(RfidData data, MIFARE_Key *stdKey)
 	for (int i = 0; i < 4; i++) {
 		Sector1Buffer[i] = (uint8_t)(data.Bestellnummer >> (8 * (3 - i))& 0x000000FF);
 		}
-	Serial.println();
 	//Sort uint16 into 2 uint8 for transfer
 	for (int i = 0; i < 2; i++) {
 		Sector1Buffer[i+6] = (uint8_t)(data.CocktailNr >> (8 * (2 - i)) & 0x00FF);
@@ -97,7 +96,6 @@ bool RFID::readData(RfidData & data, MIFARE_Key *stdKey)
 	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 7, stdKey, &(uid)); //Authenticate at sector 0
 	if (status != STATUS_OK)
 		return false;
-	Serial.println("1");
 	status = (StatusCode) MIFARE_Read(4, &MiscBuffer[0], &size);   //Read sector 0
 	if (status != STATUS_OK)
 		return false;
@@ -109,7 +107,6 @@ bool RFID::readData(RfidData & data, MIFARE_Key *stdKey)
 	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, 11, stdKey, &(uid)); //Authenticate at sector 1
 	if (status != STATUS_OK)
 		return false;
-	Serial.println("Step4");
 	status = (StatusCode) MIFARE_Read(8, &NameBuffer[0], &size);  //Read sector 4
 	if (status != STATUS_OK)
 		return false;

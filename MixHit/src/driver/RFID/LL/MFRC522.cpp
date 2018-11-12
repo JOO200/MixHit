@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include "MFRC522.h"
 #include "MFRC522Debug.h"
+#include "./src/libs/MyMutex.h"
 
 /////////////////////////////////////////////////////////////////////////////////////
 // Functions for setting up the Arduino
@@ -45,10 +46,12 @@ MFRC522::MFRC522(	byte chipAddress,
 void MFRC522::PCD_WriteRegister(	PCD_Register reg,		///< The register to write to. One of the PCD_Register enums.
 									byte value		///< The value to write.
 								) {
+	MyMutex_I2C_lock();
 	Wire.beginTransmission(_chipAddress);
 	Wire.write((byte)reg>>1);
 	Wire.write(value);
 	Wire.endTransmission();
+	MyMutex_I2C_unlock();
 } // End PCD_WriteRegister()
 
 /**
@@ -59,12 +62,14 @@ void MFRC522::PCD_WriteRegister(	PCD_Register reg,		///< The register to write t
 									byte count,		///< The number of bytes to write to the register
 									byte *values	///< The values to write. Byte array.
 								) {
+	MyMutex_I2C_lock();
 	Wire.beginTransmission(_chipAddress);
 	Wire.write((byte)reg>>1);
 	for (byte index = 0; index < count; index++) {
 		Wire.write(values[index]);
 	}
 	Wire.endTransmission();
+	MyMutex_I2C_unlock();
 } // End PCD_WriteRegister()
 
 /**
@@ -75,12 +80,14 @@ byte MFRC522::PCD_ReadRegister(	PCD_Register reg	///< The register to read from.
 								) {
 	byte value;
 	//digitalWrite(_chipSelectPin, LOW);			// Select slave
+	MyMutex_I2C_lock();
 	Wire.beginTransmission(_chipAddress);
 	Wire.write((byte)reg>>1);
 	Wire.endTransmission();
 
 	Wire.requestFrom((uint8_t)_chipAddress, (uint8_t)1);
 	value = Wire.read();
+	MyMutex_I2C_unlock();
 	return value;
 } // End PCD_ReadRegister()
 
@@ -98,6 +105,7 @@ void MFRC522::PCD_ReadRegister(	PCD_Register reg,		///< The register to read fro
 	}
 	byte address = (byte)reg>>1;
 	byte index = 0;							// Index in values array.
+	MyMutex_I2C_lock();
 	Wire.beginTransmission(_chipAddress);
 	Wire.write(address);
 	Wire.endTransmission();
@@ -119,6 +127,7 @@ void MFRC522::PCD_ReadRegister(	PCD_Register reg,		///< The register to read fro
 		}
 		index++;
 	}
+	MyMutex_I2C_unlock();
 } // End PCD_ReadRegister()
 
 /**
