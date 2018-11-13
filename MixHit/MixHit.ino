@@ -17,6 +17,7 @@
 void loop_1(void * pvParameters);
 void loop_2(void * pvParameters);
 void loop_3(void * pvParameters);
+
 #ifdef OPERATION_MODE_CM_IOT
 void loop_4(void * pvParameters);
 TaskHandle_t RFIDTask;

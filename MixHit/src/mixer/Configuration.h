@@ -27,7 +27,7 @@ extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
 #define OPERATION_MODE_CM_IOT
 
 
- /*Define Pins if CM is in IOT mode*/
+ /*Define Pins and enums if CM is in IOT mode*/
 #ifdef OPERATION_MODE_CM_IOT
 extern TaskHandle_t RFIDTask;
 
@@ -39,9 +39,9 @@ enum eRFIDStateMachine
 {
 	RFID_Idle,				// Idle state, waiting for new card
 	RFID_RotateTable,		// Rotate table
-	RFID_Reading,
-	RFID_Filling,			// Prepare mixing cocktail
-	RFID_FullGlassInStation	// Just mixed a cocktail, determine next action
+	RFID_Reading,			// Supervise table rotation
+	RFID_Filling,			// Mixing Cocktail
+	RFID_DisplayError		// Display error messages of SM
 };
 
 enum eRFIDErrorcode
@@ -54,7 +54,6 @@ enum eRFIDErrorcode
 	RFID_FDATAREAD,			// Failed to read RFID data
 	RFID_FMIXERQUEUE,		// Unable to add order to mixer queue
 	RFID_FWRITECARD			// Exception while trying to write the card
-
 };
 #endif
 

@@ -12,8 +12,7 @@
 // ###############################################################################
 
 #include "Main_CocktailMixer.h"
-#include "../MixHit/src/driver/RFID/RFID_Errorcodes.h"
-#include "../MixHit/src/driver/RFID/RFID_StateMachine.h"
+#include "Configuration.h"
 
 cCocktailMixer gCocktailMixer;
 bool LogActive = false;
@@ -408,59 +407,69 @@ void loop_RFID(RFID rfid1)
 	RFID::Uid lastUID;
 	RFID::MIFARE_Key stdKey;
 	RFID::MIFARE_Key secretKey;
+	byte z = 0;
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 6; i++) {			// Generating RFID sector keys
 		stdKey.keyByte[i] = 0xFF;
 		secretKey.keyByte[i] = 0xFF - i;
 	}
-	for (;;) {
 
-		// STUFF BY Soeren
-		/*switch (RFIDSystemState)
+	while (true)
+	{
+		switch (RFIDSystemState)
 		{
 		case RFID_Idle:
 			if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
-				Serial.println("RFID: new card detected");
-				status = RFID_OK;
+				Serial.println("RFID: New Tag present.Start reading...");
+				RFIDSystemState = RFID_Reading;		// Since tag is found switch to reading section
 			}
 			else
-				vTaskDelay(30 / portTICK_RATE_MS); // Pause Task for 30ms
+				vTaskDelay(50 / portTICK_RATE_MS); // Pause Task for 30ms
 			break;
 		case RFID_Reading:
+			status = RFID_OK;
 			if (!rfid1.PICC_ReadCardSerial()) {		//read card serial
 				status = RFID_FCARDSERIAL;
+				RFIDSystemState = RFID_DisplayError;	// Goto Error
 			}
-			if (status != RFID_OK)
-				break;
-			byte z = 0;
+
+			z = 0;
 			for (int i = 0; i < rfid1.uid.size; i++) { //compare last RFID tag to new RFID tag. Prevent reading the same tag.
 				if (lastUID.uidByte[i] == rfid1.uid.uidByte[i])
 					z++;
 			}
-			if (z == rfid1.uid.size)
+			if (z == rfid1.uid.size)	// if all sectors are identical
+			{
 				status = RFID_FUIDIDENTICAL;
-			if (status != RFID_OK)
-				break;
-			else
-				lastUID = rfid1.uid;	//update UID to current UID
+				RFIDSystemState = RFID_DisplayError;	// goto Error
+			}				
 
-			if (!rfid1.getDrinkStatus(readData.Status, &secretKey)) {
+			if (status == RFID_OK && !rfid1.getDrinkStatus(readData.Status, &secretKey)) {
 				status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
+				RFIDSystemState = RFID_DisplayError;
 			}
-			else {
-				if (readData.Status != 0xFF)
-					status = RFID_FWRONGSTATUS;
+			else if (readData.Status != 0xFF)
+			{
+				status = RFID_FWRONGSTATUS;
+				RFIDSystemState = RFID_DisplayError;
 			}
+
 			if (status == RFID_OK && !rfid1.readData(readData, &stdKey)) {		// can't read complete dataset
 				status = RFID_FDATAREAD;
+				RFIDSystemState = RFID_DisplayError;
 			}
 
 			if (status == RFID_OK && !rfid1.setDrinkStatus(0x00, &secretKey)) {		// cannot write tag
 				status = RFID_FWRITECARD;
+				RFIDSystemState = RFID_DisplayError;
 			}
+
 			if (status == RFID_OK) {
+				lastUID = rfid1.uid;	//update UID to current UID
 				RFIDSystemState = RFID_Filling;
 			}
+			else
+				RFIDSystemState = RFID_Idle;		// just for safety
 
 			break;
 		case RFID_RotateTable:
@@ -469,13 +478,14 @@ void loop_RFID(RFID rfid1)
 			ulTaskNotifyTake(pdTRUE,          // Clear the notification value before exiting. 
 				portMAX_DELAY); // Block indefinitely. 
 			Serial.println("RFID: Position shift finished");
+			RFIDSystemState = RFID_Idle;	// Return to Idle and wait for new tag
 			break;
 		case RFID_Filling:
 			gCocktailMixer.mRotateTable.goToNextPosition();
 			Serial.println("RFID: Waiting Position shift to finish");
 			ulTaskNotifyTake(pdTRUE,         // Clear the notification value before exiting. 
 				portMAX_DELAY); // Block indefinitely. 
-			Serial.println("RFID: Position shift finished");
+			Serial.println("RFID: Position shift finished. Start mixing...");
 
 			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
 				status = RFID_FMIXERQUEUE;
@@ -485,153 +495,55 @@ void loop_RFID(RFID rfid1)
 				portMAX_DELAY); // Block indefinitely. 
 			Serial.println("RFID: Mixing finished");
 
-			for (int i = 0; i < 5; i++) {
+			z = 0;
+			while (z < 5 && RFIDSystemState == RFID_Filling) {		// check for five times, break if state has changed to read
 				if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
-					Serial.println("RFID: Restarting filling");
+					Serial.println("RFID: New Tag present. Start reading...");
 					status = RFID_OK;
 					RFIDSystemState = RFID_Reading;
 				}
-				vTaskDelay(5 / portTICK_RATE_MS);
+				z++;
+				vTaskDelay(10 / portTICK_RATE_MS);
 			}
 			if (RFIDSystemState != RFID_Reading)
-				RFIDSystemState = RFID_FullGlassInStation;
+				RFIDSystemState = RFID_RotateTable;
 
 			break;
-		case RFID_FullGlassInStation:
+		case RFID_DisplayError:
+			switch (status)
+			{
+			case RFID_FCARDSERIAL:		// Failed to read current card serial
+				Serial.println("RFID: Can't read serial of current card");
+				break;
+			case RFID_FUIDIDENTICAL:	// UID matches last UID -> card read twice
+				Serial.println("RFID: Tag identical with previous card. Insert new glass.");
+				break;
+			case RFID_FDRINKSTATUS:		// Can't read drink status
+				Serial.println("RFID: Can't read drink status value.");
+				break;
+			case RFID_FWRONGSTATUS:		// Unexpected Status
+				Serial.println("RFID: Wrong drink status received. Drink might be already served or area is corrupted.");
+				break;
+			case RFID_FDATAREAD:		// Failed to read RFID data
+				Serial.println("RFID: Failed to read RFID sectors.");
+				break;
+			case RFID_FMIXERQUEUE:		// Unable to add order to mixer queue
+				Serial.println("RFID: Unable to append drink to mixer queue.");
+				break;
+			case RFID_FWRITECARD:		// Exception while trying to write the card
+				Serial.println("RFID: Error updating tag.");
+				break;
+			}
+
+			status = RFID_OK;			// Reset msg report, rotate one position and wait for new tag
 			RFIDSystemState = RFID_RotateTable;
 			break;
 		default:
+			Serial.println("RFID: SM entered an undefined state! Returning to Idle...");
+			RFIDSystemState = RFID_Idle;
 			break;
 		}
-
 	}
-
-
-
-/*
-
-
-/*	while (true)
-	{
-		switch (lMachineState)
-		{
-		case RFID_Idle:
-			if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
-				Serial.println("RFID: new card detected");
-				status = RFID_OK;
-
-				if (!rfid1.PICC_ReadCardSerial()) {		//read card serial
-					status = RFID_FCARDSERIAL;
-				}
-
-				if (status == RFID_OK)
-				{
-					status = RFID_OK;
-					byte z = 0;
-					for (int i = 0; i < rfid1.uid.size; i++) { //compare last RFID tag to new RFID tag. Prevent reading the same tag.
-						if (lastUID.uidByte[i] == rfid1.uid.uidByte[i])
-							z++;
-					}
-					if (z == rfid1.uid.size)
-						status = RFID_FUIDIDENTICAL;
-				}
-
-				if (status == RFID_OK) { //exit function if uid is identical (prevent reading the same tag)
-					lastUID = rfid1.uid;	//update UID to current UID
-				}
-
-				if (status == RFID_OK && !rfid1.getDrinkStatus(readData.Status, &secretKey)) {
-					status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
-					Serial.println(readData.Status, HEX);
-				}
-
-				if (status == RFID_OK && readData.Status == 0xFF) {
-					status = RFID_FWRONGSTATUS;		// error if readData.Status is set to FF -> check value FF again!
-				}
-
-				if (status == RFID_OK && !rfid1.readData(readData, &stdKey)) {		// can't read complete dataset
-					status = RFID_FDATAREAD;
-				}
-				if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
-					status = RFID_FMIXERQUEUE;
-				}
-				if (status == RFID_OK && !rfid1.setDrinkStatus(0x00, &secretKey)) {		// cannot write tag
-					status = RFID_FWRITECARD;
-				}
-
-				//determine action depending on status
-				switch (status)
-				{
-				case RFID_OK:*/
-/*					Serial.println("RFID: Start table rotation");
-					gCocktailMixer.mRotateTable.goToNextPosition();		//rotate table one position w/o filling the glass
-					Serial.println("RFID: Read successfully"); */
-//					Serial.println("RFID: Read successful");
-/*
-					break;
-
-				case RFID_FCARDSERIAL:
-					Serial.println("RFID: cannot read card serial");
-					break;
-
-				case RFID_FUIDIDENTICAL:
-					Serial.println("RFID: UID idential with last card");
-					lMachineState = RFID_RotateTable;
-					break;
-
-				case RFID_FDRINKSTATUS:
-					Serial.println("RFID: Error reading RFID status field");
-					break;
-
-				case RFID_FWRONGSTATUS:
-					Serial.println("RFID: Wrong status given");
-					lMachineState = RFID_RotateTable;
-					break;
-
-				case RFID_FDATAREAD:
-					Serial.println("RFID: Error reading RFID data structure");
-					break;
-
-				case RFID_FMIXERQUEUE:
-					Serial.println("RFID: Unable to access mixer queue");
-					break;
-
-				case RFID_FWRITECARD:
-					Serial.println("RFID: Can't update RFID Card status");
-					break;
-
-				default:
-					break;
-				}
-
-				rfid1.PCD_StopCrypto1(); //Stop communication with Tag
-			}
-			vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
-			break;
-
-		case RFID_RotateTable:
-			Serial.println("Rotating Table...");
-			gCocktailMixer.mRotateTable.goToNextPosition();
-			vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
-			break;
-
-		case RFID_Filling:
-
-			vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
-			break;
-
-		case RFID_FullGlassInStation:
-			// Gewicht einlesen mit
-			// mScale.getWeight();
-			vTaskDelay(50 / portTICK_RATE_MS); //Suspend Task for 50 ms
-			break;
-
-		default:
-			Serial.println("RFID SM: Entered undefined machine state! Entering Idle...");
-			lMachineState = RFID_Idle;
-			break;
-		}
-	}*/
 }
 #endif
 
