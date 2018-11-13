@@ -17,7 +17,9 @@
 void loop_1(void * pvParameters);
 void loop_2(void * pvParameters);
 void loop_3(void * pvParameters);
+#ifdef OPERATION_MODE_CM_IOT
 void loop_4(void * pvParameters);
+#endif
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -80,7 +82,10 @@ void setup()
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
 	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
-	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, NULL, 0);
+#ifdef OPERATION_MODE_CM_IOT
+	TaskHandle_t RFIDTask;
+	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, &RFIDTask, 0);
+#endif
 }
 
 // the loop function runs over and over again until power down or reset
@@ -114,6 +119,7 @@ void loop_3(void * pvParameters)
 		loop_OLED();
 	}
 }
+#ifdef OPERATION_MODE_CM_IOT
 void loop_4(void * pvParameters)
 {
 
@@ -127,17 +133,12 @@ void loop_4(void * pvParameters)
 	Serial.println(version,HEX);
 	if (version == (byte)0x92) {
 		loop_RFID(rfid1);
-		
 	}
 	else {
 		Serial.println("RFID: reader version unknown!");
 		if (version == 0x00 || version == 0xFF) {
 			Serial.println("RFID: reader does not respond!");
 		}
-	}
-
-	
-
-		
-
+	}		
 }
+#endif

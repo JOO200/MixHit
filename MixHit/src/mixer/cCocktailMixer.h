@@ -32,6 +32,9 @@
 #define ERROR_findEmptyGlass_PositionNichtGefunden -1
 #define ERROR_findEmptyGlass_KeinGlasGefunden -2
 
+
+
+
 class cCocktailMixer
 {
 public:

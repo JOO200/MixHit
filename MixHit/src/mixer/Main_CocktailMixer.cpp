@@ -398,6 +398,7 @@ void loop_OLED()
 
 }
 
+#ifdef OPERATION_MODE_CM_IOT
 void loop_RFID(RFID rfid1)
 {
 	RfidData readData;
@@ -532,9 +533,17 @@ void loop_RFID(RFID rfid1)
 			lMachineState = RFID_Idle;
 			break;
 		}
+
+		// Wait for Cocktail mixer to finish mixing
+		Serial.println("RFID: Waiting for Cocktail mixer to finish");
+		ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
+						 portMAX_DELAY); /* Block indefinitely. */
+		Serial.println("RFID: Cocktail Mixer finished");
+
+
 	}
 }
-
+#endif
 
 
 void WriteDefaultConfigFile()

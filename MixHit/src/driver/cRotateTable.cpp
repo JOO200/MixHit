@@ -1,5 +1,8 @@
 #include "cRotateTable.h"
 
+#ifdef OPERATION_MODE_CM_IOT
+//extern TaskHandle_t RFIDTask;
+#endif
 cRotateTable::cRotateTable()
 {
 	mMagnetSensor = cMagnetSensor(PinMagnetTaster);
@@ -97,6 +100,9 @@ bool cRotateTable::goToNextPosition()
 				mMotor.MotorStartL(); // Zurueck drehen damit Glas frei steht
 				delay(200);
 				mMotor.MotorStop();
+				#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
+				//xTaskNotify(RFIDTask, 0xFFFFFFFF, eSetValueWithOverwrite);
+				#endif
 				return true;
 			}
 		}
