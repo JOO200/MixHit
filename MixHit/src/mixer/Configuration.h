@@ -38,6 +38,8 @@ extern TaskHandle_t RFIDTask;
 
 =======
 >>>>>>> parent of 50783a5... RFID firmware advanced
+=======
+>>>>>>> parent of 50783a5... RFID firmware advanced
 #ifndef REGION_MixHit_Infos
 #ifndef FillSIZE
 #define ORDER_BIG 2
@@ -99,11 +101,17 @@ extern const int PinSX1509Valve[MaxNumberOfReservoir];
 #define I2C_SX1509address 0x3E
 #define I2C_OLEDaddress 0x3C
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 50783a5... RFID firmware advanced
 
 #define RFID_READER_ADDR 0x28
 #define RFID_READER_RST 15 //CHANGE THIS!
 
+<<<<<<< HEAD
+>>>>>>> parent of 50783a5... RFID firmware advanced
+=======
 >>>>>>> parent of 50783a5... RFID firmware advanced
 
 #endif
