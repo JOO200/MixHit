@@ -2,8 +2,7 @@
 #define _CWAAGE_H_
 
 #include "HX711.h"
-
-//#include "Configuration.h"
+#include "../mixer/Configuration.h"
 
 class cScale
 {

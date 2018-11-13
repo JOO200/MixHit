@@ -16,25 +16,6 @@ extern cOLED gOLED;							// Bekanntmachen der Objekte
 extern cCocktailList gAlcoholicList;		// Bekanntmachen der Objekte
 extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
 
-/*******************************************************************************************
-*	DEFINE REGION CM-operating mode
-*	this define changes the software fundamentally.
-*	It either works in IOT Mode or "normal" mode
-*
-*
-***************************************/
-//#define OPERATION_MODE_CM_100
-#define OPERATION_MODE_CM_IOT
- /*Define Pins if CM is in IOT mode*/
-#ifdef OPERATION_MODE_CM_IOT
-extern TaskHandle_t RFIDTask;
-
-#define RFID_READER_ADDR 0x28
-#define RFID_READER_RST 15 //CHANGE THIS!
-#endif
-#define I2C_SX1509address 0x3E
-#define I2C_OLEDaddress 0x3C
-
 #ifndef REGION_MixHit_Infos
 #ifndef FillSIZE
 #define ORDER_BIG 2
