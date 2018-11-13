@@ -452,17 +452,30 @@ void loop_RFID(RFID rfid1)
 			if (status == RFID_OK && !rfid1.readData(readData, &stdKey)) {		// can't read complete dataset
 				status = RFID_FDATAREAD;
 			}
-			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
-				status = RFID_FMIXERQUEUE;
-			}
+
 			if (status == RFID_OK && !rfid1.setDrinkStatus(0x00, &secretKey)) {		// cannot write tag
 				status = RFID_FWRITECARD;
+			}
+			if (status == RFID_OK) {
+				RFIDSystemState = RFID_Filling;
 			}
 
 			break;
 		case RFID_RotateTable:
+			gCocktailMixer.mRotateTable.goToNextPosition();
+
+			Serial.println("RFID: Waiting Position shift to finish");
+			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
+				portMAX_DELAY); /* Block indefinitely. */
+			Serial.println("RFID: Cocktail Mixer finished");
 			break;
 		case RFID_Filling:
+
+			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
+				status = RFID_FMIXERQUEUE;
+			}
+
+
 			break;
 		case RFID_FullGlassInStation:
 			break;
