@@ -388,11 +388,11 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 
 
 		gOLED.PrintFirstLine("Cocktail mixen");
-		mServo.goToPosition_Open();
+		mServo.Aktivieren();
 		gCocktailMixer.WaitMillis(1000);
 		mValveControl.setValveState(lReservoirIndices, lTimes, lNumberOfIngredients); // Liste der Ventile und Zeiten an die Ventilsteuerung uebergeben.
 		WaitMillis(2000);//DEFAULT 1000
-		mServo.goToPosition_Close();
+		mServo.Deaktivieren();
 		mAmountOfMixedCocktails++; // Anzahl an gemixten Cocktails erhoehen (fuer die Statistik).
 		double lEndWeight = mScale.getWeight(); // Endgewicht ermitteln
 		Serial.println("Weight Difference: " + String(lEndWeight - lStartWeight));
@@ -477,7 +477,7 @@ int cCocktailMixer::InitIngredient(int pIndex)
 
 
 		double lStartWeight = mScale.getWeight();
-		mServo.goToPosition_Open();
+		mServo.Aktivieren();
 		WaitMillis(1000);
 		unsigned long lStartTime = millis();
 		unsigned long lMaxInitTime = 30000; // Maximale Zeit zum Initialisieren. Dauert die Initialisierung laenger, ist vermutlich der Vorratsbehaelter leer.
@@ -502,13 +502,13 @@ int cCocktailMixer::InitIngredient(int pIndex)
 				
 				gCocktailMixer.mValveControl.setValveState(pIndex, false);
 				delay(1000);
-				mServo.goToPosition_Close();
+				mServo.Deaktivieren();
 				return MachineState_ERROR_AnlagenStatus;
 			}
 		}
 		gCocktailMixer.mValveControl.setValveState(pIndex, false);
 		WaitMillis(1000);
-		mServo.goToPosition_Close();
+		mServo.Deaktivieren();
 		if (lTempWeight < lFillWeight) 
 		{ // Falls die Zeit abgelaufen ist und das gewicht noch nicht erreicht wurde.
 			setMachineState(MachineState_ERROR_VorratLeer);

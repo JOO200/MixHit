@@ -3,7 +3,7 @@
 cRotateTable::cRotateTable()
 {
 	mMagnetSensor = cMagnetSensor(PinMagnetTaster);
-	mMotor = cMotor(PinMotor, PinDrehrichtung);
+	mMotor = cMotor(PinPwm, PinDrehrichtung);
 	mCurrentPosition = -1; // -1 bedeutet, dass die Position nicht bekannt ist.
 	mTimeToNextSlot = 9516;
 }

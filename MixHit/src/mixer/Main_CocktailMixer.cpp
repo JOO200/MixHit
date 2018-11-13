@@ -45,7 +45,7 @@ void setup_CocktailMixer()
 	//AttacheInterrupts(); // Aktiviert die Interrupts und legt die PinModes fest.
 	Serial.println("Interrupts_OK");
 #endif
-	gCocktailMixer.mServo.goToPosition_Close();
+	gCocktailMixer.mServo.Deaktivieren();
 }
 
 void loop_CocktailMixer()
@@ -217,7 +217,7 @@ void loop_CocktailMixer()
 			{
 				gCocktailMixer.mValveControl.setValveState(i, false); // Falls im Menue das aktuelle Ventil ausgewaehlt ist, wird das Ventil geoeffnet, andernfalls geschlossen
 			}
-			gCocktailMixer.mServo.goToPosition_Open();
+			gCocktailMixer.mServo.Aktivieren();
 			gOLED.PrintFirstLine("Geschlossen");
 			delay(100);
 		}
@@ -267,13 +267,13 @@ void loop_CocktailMixer()
 #ifndef REGION_TestMode_Servo0
 		if (lMachineState == MachineState_TestMode_Servo0)
 		{
-			gCocktailMixer.mServo.goToPosition_Close();
+			gCocktailMixer.mServo.Deaktivieren();
 		}
 #endif
 #ifndef REGION_TestMode_RotateTableL
 		if (lMachineState == MachineState_TestMode_Servo1)
 		{
-			gCocktailMixer.mServo.goToPosition_Open();
+			gCocktailMixer.mServo.Aktivieren();
 		}
 #endif
 #ifndef REGION_TestMode
