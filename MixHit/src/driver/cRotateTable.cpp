@@ -13,9 +13,9 @@ bool cRotateTable::goToFirstPosition()
 	gOLED.PrintFirstLine("Position 1 suchen");
 	mMotor.MotorStartR();
 	unsigned long lStartTime = millis(); // Startzeit speichern (damit im Fehlerfall nach einer gewissen Zeit abgebrochen werden kann).
-	unsigned long lMaxSearchTime = 120000; // 120sec = 2min - Zeit, nach der Abgebrochen wird falls die Position nicht gefunden wird.
+	unsigned long lMaxSearchTime = 60000; // 60sec = 1min - Zeit, nach der Abgebrochen wird falls die Position nicht gefunden wird.
 
-	unsigned long lMaxDeltaTime = 2000; // An der Position 1 sind zwei Magnete hintereinander. Falls also diese beiden Flanken weniger als 1sec voneinander Entfernt sind, ist die Position gefunden.
+	unsigned long lMaxDeltaTime = 500; // An der Position 1 sind zwei Magnete hintereinander. Falls also diese beiden Flanken weniger als 0,5sec voneinander Entfernt sind, ist die Position gefunden.
 	bool lOldSignal = getMagnetSensorSignal(); // Beim Start der Funktion wird das vorhergehende Signal des Magnetsensors als das aktuelle angenommen.
 	unsigned long lLastTimerisingEdge = lOldSignal == true ? millis() : 0; // Dort wird nachfolgend die Zeit gespeichert, an der ein Uebergang von 0 auf 1 stattfindet. Falls das lOldSignal bereits true ist, wird die aktuelle Zeit angenommen, ansonsten 0.
 	#ifndef REGION_Position_0_Finden
@@ -31,8 +31,9 @@ bool cRotateTable::goToFirstPosition()
 			{ // Wenn innerhalb der "lMaxDeltaTime" zwei steigende Flanken auftreten ist Position 0 erreicht (bei Position 0 sind zwei Magnete? in kurzem Abstand hintereinander angebracht)
 				Serial.println("Position 1 gefunden.");
 				gOLED.PrintFirstLine("Position 1 gefunden");
+				mMotor.MotorStop();
 				mMotor.MotorStartL(); // Zurueck drehen damit Glas frei steht
-				delay(200);
+				delay(20);							// 200 default
 				mMotor.MotorStop();
 				mCurrentPosition = 1; // Aktuelle Position auf 1 setzen
 				return true; // Funktion verlassen
