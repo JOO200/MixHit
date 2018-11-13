@@ -13,9 +13,13 @@ public:
 	void MotorStartR();									// Startet den Motor (konstante Drehzahl und konstante Drehrichtung)
 	void MotorStartL();									// Startet den Motor (konstante Drehzahl und konstante Drehrichtung)
 	void MotorStop();									// Stoppt den Motor.
+	void Anlauframpe(bool Drehrichtung);
+	void Bremsrampe();
 private:
 	int mPinDrehrichtung;								// Pinnummer des Motors ???
 	int mPinPwm;										// Pinnummer zur auswahl der Drehrichtung???
+	bool stateRunning;
+
 };
 
 #endif

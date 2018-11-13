@@ -16,7 +16,6 @@ extern cOLED gOLED;							// Bekanntmachen der Objekte
 extern cCocktailList gAlcoholicList;		// Bekanntmachen der Objekte
 extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
 
-<<<<<<< HEAD
 /*******************************************************************************************
 *	DEFINE REGION CM-operating mode
 *	this define changes the software fundamentally.
@@ -26,20 +25,43 @@ extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
 ***************************************/
 //#define OPERATION_MODE_CM_100
 #define OPERATION_MODE_CM_IOT
+
+
  /*Define Pins if CM is in IOT mode*/
 #ifdef OPERATION_MODE_CM_IOT
 extern TaskHandle_t RFIDTask;
 
 #define RFID_READER_ADDR 0x28
-#define RFID_READER_RST 15 //CHANGE THIS!
+#define RFID_READER_RST 15
+
+
+enum eRFIDStateMachine
+{
+	RFID_Idle,				// Idle state, waiting for new card
+	RFID_RotateTable,		// Rotate table
+	RFID_Reading,
+	RFID_Filling,			// Prepare mixing cocktail
+	RFID_FullGlassInStation	// Just mixed a cocktail, determine next action
+};
+
+enum eRFIDErrorcode
+{
+	RFID_OK,				// Everything ok
+	RFID_FCARDSERIAL,		// Failed to read current card serial
+	RFID_FUIDIDENTICAL,		// UID matches last UID -> card read twice
+	RFID_FDRINKSTATUS,		// Can't read drink status
+	RFID_FWRONGSTATUS,		// Unexpected Status
+	RFID_FDATAREAD,			// Failed to read RFID data
+	RFID_FMIXERQUEUE,		// Unable to add order to mixer queue
+	RFID_FWRITECARD			// Exception while trying to write the card
+
+};
 #endif
+
+
 #define I2C_SX1509address 0x3E
 #define I2C_OLEDaddress 0x3C
 
-=======
->>>>>>> parent of 50783a5... RFID firmware advanced
-=======
->>>>>>> parent of 50783a5... RFID firmware advanced
 #ifndef REGION_MixHit_Infos
 #ifndef FillSIZE
 #define ORDER_BIG 2
@@ -85,8 +107,8 @@ extern TaskHandle_t RFIDTask;
 #define RESOLUTION 8									// Resolution
 
 #define PinServoPWM 32
-#define ServoPosAktiv 20
-#define ServoPosDeaktiv 110
+#define ServoPosAktiv 45
+#define ServoPosDeaktiv 49
 
 #define PinSX1509Valve_0 7 
 #define PinSX1509Valve_1 0
@@ -100,19 +122,12 @@ extern const int PinSX1509Valve[MaxNumberOfReservoir];
 
 #define I2C_SX1509address 0x3E
 #define I2C_OLEDaddress 0x3C
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> parent of 50783a5... RFID firmware advanced
+
 
 #define RFID_READER_ADDR 0x28
 #define RFID_READER_RST 15 //CHANGE THIS!
 
-<<<<<<< HEAD
->>>>>>> parent of 50783a5... RFID firmware advanced
-=======
->>>>>>> parent of 50783a5... RFID firmware advanced
+
 
 #endif
 #ifndef REGION_MachineStates

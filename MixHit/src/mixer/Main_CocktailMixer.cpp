@@ -398,11 +398,13 @@ void loop_OLED()
 
 }
 
+
+#ifdef OPERATION_MODE_CM_IOT
 void loop_RFID(RFID rfid1)
 {
 	RfidData readData;
 	eRFIDErrorcode status = RFID_OK;
-	eRFIDStateMachine lMachineState = RFID_Idle;
+	eRFIDStateMachine RFIDSystemState = RFID_Idle;
 	RFID::Uid lastUID;
 	RFID::MIFARE_Key stdKey;
 	RFID::MIFARE_Key secretKey;
@@ -411,6 +413,69 @@ void loop_RFID(RFID rfid1)
 		stdKey.keyByte[i] = 0xFF;
 		secretKey.keyByte[i] = 0xFF - i;
 	}
+	for (;;) {
+
+		switch (RFIDSystemState)
+		{
+		case RFID_Idle:
+			if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
+				Serial.println("RFID: new card detected");
+				status = RFID_OK;
+			}
+			else
+				vTaskDelay(30 / portTICK_RATE_MS); // Pause Task for 30ms
+			break;
+		case RFID_Reading:
+			if (!rfid1.PICC_ReadCardSerial()) {		//read card serial
+				status = RFID_FCARDSERIAL;
+			}
+			if (status != RFID_OK)
+				break;
+			byte z = 0;
+			for (int i = 0; i < rfid1.uid.size; i++) { //compare last RFID tag to new RFID tag. Prevent reading the same tag.
+				if (lastUID.uidByte[i] == rfid1.uid.uidByte[i])
+					z++;
+			}
+			if (z == rfid1.uid.size)
+				status = RFID_FUIDIDENTICAL;
+			if (status != RFID_OK)
+				break;
+			else
+				lastUID = rfid1.uid;	//update UID to current UID
+
+			if (!rfid1.getDrinkStatus(readData.Status, &secretKey)) {
+				status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
+			}else {
+				if (readData.Status != 0xFF)
+					status = RFID_FWRONGSTATUS;
+			}
+			if (status == RFID_OK && !rfid1.readData(readData, &stdKey)) {		// can't read complete dataset
+				status = RFID_FDATAREAD;
+			}
+			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
+				status = RFID_FMIXERQUEUE;
+			}
+			if (status == RFID_OK && !rfid1.setDrinkStatus(0x00, &secretKey)) {		// cannot write tag
+				status = RFID_FWRITECARD;
+			}
+
+			break;
+		case RFID_RotateTable:
+			break;
+		case RFID_Filling:
+			break;
+		case RFID_FullGlassInStation:
+			break;
+		default:
+			break;
+		}
+
+	}
+
+
+
+
+
 
 	while (true)
 	{
@@ -534,7 +599,7 @@ void loop_RFID(RFID rfid1)
 		}
 	}
 }
-
+#endif
 
 
 void WriteDefaultConfigFile()

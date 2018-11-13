@@ -97,6 +97,9 @@ bool cRotateTable::goToNextPosition()
 				mMotor.MotorStartL(); // Zurueck drehen damit Glas frei steht
 				delay(200);
 				mMotor.MotorStop();
+				#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
+				xTaskNotify(RFIDTask, 0xFFFFFFFF, eSetValueWithOverwrite);
+				#endif
 				return true;
 			}
 		}
@@ -106,6 +109,9 @@ bool cRotateTable::goToNextPosition()
 	gOLED.PrintFirstLine("Position nicht gefunden");
 	setMachineState(MachineState_ERROR_NaechstePositionNichtGefunden);
 	mMotor.MotorStop();
+	#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
+	xTaskNotify(RFIDTask, 0x10, eSetValueWithOverwrite);
+	#endif
 	return false;
 }
 int cRotateTable::getPosition()

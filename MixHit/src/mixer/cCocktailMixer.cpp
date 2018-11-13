@@ -398,7 +398,12 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 		mSlotOrderNumber[lSlotNumber - 1] = pBestellung.getOrderNumber(); // -1, da lSlotNumber bei 1 beginnt. Bestellnummer dem Slot zuordnen, in dem der Cocktail gemixt wurde.
 		mSlotCocktailName[lSlotNumber - 1] = pBestellung.getCocktail().getCocktailName(); // -1, da lSlotNumber bei 1 beginnt. Cocktailname dem Slot zuordnen, in dem der Cocktail gemixt wurde.
 		
+#ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 		mRotateTable.goToNextPosition(); // Drehteller eine Position weiter rotieren.
+#else
+		xTaskNotify(RFIDTask, 0xFFFFFFFF, eSetValueWithOverwrite);
+#endif
+
 		return mixCocktail_OK;
 	}
 	else
