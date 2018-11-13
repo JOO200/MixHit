@@ -445,7 +445,8 @@ void loop_RFID(RFID rfid1)
 
 			if (!rfid1.getDrinkStatus(readData.Status, &secretKey)) {
 				status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
-			}else {
+			}
+			else {
 				if (readData.Status != 0xFF)
 					status = RFID_FWRONGSTATUS;
 			}
@@ -463,21 +464,40 @@ void loop_RFID(RFID rfid1)
 			break;
 		case RFID_RotateTable:
 			gCocktailMixer.mRotateTable.goToNextPosition();
-
 			Serial.println("RFID: Waiting Position shift to finish");
 			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
 				portMAX_DELAY); /* Block indefinitely. */
-			Serial.println("RFID: Cocktail Mixer finished");
+			Serial.println("RFID: Position shift finished");
 			break;
 		case RFID_Filling:
+			gCocktailMixer.mRotateTable.goToNextPosition();
+			Serial.println("RFID: Waiting Position shift to finish");
+			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
+				portMAX_DELAY); /* Block indefinitely. */
+			Serial.println("RFID: Position shift finished");
 
 			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
 				status = RFID_FMIXERQUEUE;
 			}
+			Serial.println("RFID: Waiting for mixer");
+			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
+				portMAX_DELAY); /* Block indefinitely. */
+			Serial.println("RFID: Mixing finished");
 
+			for (int i = 0; i < 5; i++) {
+				if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
+					Serial.println("RFID: Restarting filling");
+					status = RFID_OK;
+					RFIDSystemState = RFID_Reading;
+				}
+				vTaskDelay(5 / portTICK_RATE_MS);
+			}
+			if (RFIDSystemState != RFID_Reading)
+				RFIDSystemState = RFID_FullGlassInStation;
 
 			break;
 		case RFID_FullGlassInStation:
+			RFIDSystemState = RFID_RotateTable;
 			break;
 		default:
 			break;
@@ -486,11 +506,11 @@ void loop_RFID(RFID rfid1)
 	}
 
 
+}
 
 
 
-
-	while (true)
+/*	while (true)
 	{
 		switch (lMachineState)
 		{
@@ -541,12 +561,12 @@ void loop_RFID(RFID rfid1)
 				//determine action depending on status
 				switch (status)
 				{
-				case RFID_OK:
+				case RFID_OK:*/
 /*					Serial.println("RFID: Start table rotation");
 					gCocktailMixer.mRotateTable.goToNextPosition();		//rotate table one position w/o filling the glass
 					Serial.println("RFID: Read successfully"); */
-					Serial.println("RFID: Read successful");
-
+//					Serial.println("RFID: Read successful");
+/*
 					break;
 
 				case RFID_FCARDSERIAL:
@@ -611,7 +631,7 @@ void loop_RFID(RFID rfid1)
 			break;
 		}
 	}
-}
+}*/
 #endif
 
 
