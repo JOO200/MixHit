@@ -415,7 +415,8 @@ void loop_RFID(RFID rfid1)
 	}
 	for (;;) {
 
-		switch (RFIDSystemState)
+		// STUFF BY Soeren
+		/*switch (RFIDSystemState)
 		{
 		case RFID_Idle:
 			if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
@@ -465,23 +466,23 @@ void loop_RFID(RFID rfid1)
 		case RFID_RotateTable:
 			gCocktailMixer.mRotateTable.goToNextPosition();
 			Serial.println("RFID: Waiting Position shift to finish");
-			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
-				portMAX_DELAY); /* Block indefinitely. */
+			ulTaskNotifyTake(pdTRUE,          // Clear the notification value before exiting. 
+				portMAX_DELAY); // Block indefinitely. 
 			Serial.println("RFID: Position shift finished");
 			break;
 		case RFID_Filling:
 			gCocktailMixer.mRotateTable.goToNextPosition();
 			Serial.println("RFID: Waiting Position shift to finish");
-			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
-				portMAX_DELAY); /* Block indefinitely. */
+			ulTaskNotifyTake(pdTRUE,         // Clear the notification value before exiting. 
+				portMAX_DELAY); // Block indefinitely. 
 			Serial.println("RFID: Position shift finished");
 
 			if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
 				status = RFID_FMIXERQUEUE;
 			}
 			Serial.println("RFID: Waiting for mixer");
-			ulTaskNotifyTake(pdTRUE,          /* Clear the notification value before exiting. */
-				portMAX_DELAY); /* Block indefinitely. */
+			ulTaskNotifyTake(pdTRUE,          // Clear the notification value before exiting. 
+				portMAX_DELAY); // Block indefinitely. 
 			Serial.println("RFID: Mixing finished");
 
 			for (int i = 0; i < 5; i++) {
@@ -506,8 +507,8 @@ void loop_RFID(RFID rfid1)
 	}
 
 
-}
 
+/*
 
 
 /*	while (true)
@@ -630,8 +631,8 @@ void loop_RFID(RFID rfid1)
 			lMachineState = RFID_Idle;
 			break;
 		}
-	}
-}*/
+	}*/
+}
 #endif
 
 
