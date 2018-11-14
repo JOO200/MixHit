@@ -5,8 +5,10 @@
     "\\MixHit\\src",
     "\\MixHit\\src\\driver",
     "\\MixHit\\src\\driver\\RFID",
+    "\\MixHit\\src\\driver\\RFID\\LL",
     "\\MixHit\\src\\libs",
     "\\MixHit\\src\\mixer"
   ],
+  "SelectedNode": "\\MixHit\\src\\driver\\RFID\\LL\\MFRC522.h",
   "PreviewInSolutionExplorer": false
 }

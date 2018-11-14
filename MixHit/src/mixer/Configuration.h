@@ -53,7 +53,8 @@ enum eRFIDErrorcode
 	RFID_FWRONGSTATUS,		// Unexpected Status
 	RFID_FDATAREAD,			// Failed to read RFID data
 	RFID_FMIXERQUEUE,		// Unable to add order to mixer queue
-	RFID_FWRITECARD			// Exception while trying to write the card
+	RFID_FWRITECARD,		// Exception while trying to write the card
+	RFID_SELECTFAILED		// Could not select the found PICC
 };
 #endif
 
