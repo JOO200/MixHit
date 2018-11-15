@@ -147,7 +147,7 @@ bool RFID::getDrinkStatus(uint8_t &status, MIFARE_Key *secretKey)		{
 	auth_status = (StatusCode)MIFARE_Read(12, &buffer[0], &size); //Read the whole sector
 	if (auth_status != STATUS_OK)
 		return false;
-	status = buffer[0]; //pass the status byte
+	status = buffer[1]; //pass the status byte
 
 	return true;
 }

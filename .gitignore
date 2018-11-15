@@ -12,3 +12,8 @@ MixHit/__vm/.MixHit.vsarduino.h
 MixHit/__vm/Compile.vmps.xml
 MixHit/__vm/Configuration.Debug.vmps.xml
 MixHit/__vm/Upload.vmps.xml
+MixHit/MixHit.vcxproj
+.vs/MixHit/v15/.suo
+MixHit/__vm/Compile.vmps.xml
+MixHit/__vm/Configuration.Debug.vmps.xml
+MixHit/__vm/Upload.vmps.xml

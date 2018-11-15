@@ -14,7 +14,7 @@ double cScale::getWeight()
 {
 
 
-	return (double)mHX711Scale.get_units(10) * 0.009551 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
+	return (double)mHX711Scale.get_units(10) * 0.0009551 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
   //return (double)mHX711Scale.get_units(10); // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
 
 
@@ -23,7 +23,7 @@ double cScale::getWeight(int pPoints)
 {
 
 
-	return (double)mHX711Scale.get_units(pPoints) * 0.009551 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
+	return (double)mHX711Scale.get_units(pPoints) * 0.0009551 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
 
 
 }
