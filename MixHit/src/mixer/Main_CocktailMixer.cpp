@@ -92,6 +92,7 @@ void loop_CocktailMixer()
 #ifndef REGION_NormalMode
 		if (CheckNormalMode())
 		{
+			//
 			gCocktailMixer.mixNextCocktail();
 		}
 #endif
@@ -437,7 +438,7 @@ void loop_RFID(RFID rfid1)
 				}
 			}
 			else
-				vTaskDelay(30 / portTICK_RATE_MS); // Pause Task for 30ms
+				vTaskDelay(200 / portTICK_RATE_MS); // Pause Task for 30ms
 			break;
 		case RFID_Reading:
 			Serial.println("RFID: Reading");
@@ -559,21 +560,30 @@ void loop_RFID(RFID rfid1)
 					RFIDSystemState = RFID_Idle;
 				}
 				else {
-					Serial.println("RFID: Mixing finished");
-
-					retries = 5;
-					while (retries-- > 5 && RFIDSystemState == RFID_Filling) {		// check for five times, break if state has changed to read
-						if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
-							Serial.println("RFID: New Tag present. Start reading...");
-							status = RFID_OK;
-							RFIDSystemState = RFID_Reading;
-						}
-						else
-							vTaskDelay(10 / portTICK_RATE_MS); // if read failed, pause for 10 ms
-						retries++;
+					if (notificationValue == FILLING_GLASS_NOT_EMPTY) {
+						Serial.println("RFID: Glass is not empty!");
 					}
-					if (RFIDSystemState != RFID_Reading)
-						RFIDSystemState = RFID_RotateTable;
+					else if (notificationValue == FILLING_OK) {
+
+						Serial.println("RFID: Mixing finished");
+
+						retries = 5;
+						while (retries-- > 5 && RFIDSystemState == RFID_Filling) {		// check for five times, break if state has changed to read
+							if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
+								Serial.println("RFID: New tag present. Start reading...");
+								status = RFID_OK;
+								RFIDSystemState = RFID_Reading;
+							}
+							else
+								vTaskDelay(10 / portTICK_RATE_MS); // if read failed, pause for 10 ms
+							retries++;
+						}
+						if (RFIDSystemState != RFID_Reading)
+							RFIDSystemState = RFID_RotateTable;
+					}
+
+					else
+						Serial.println("RFID: Filling notification value unknown!");
 				}
 			}
 			break;
