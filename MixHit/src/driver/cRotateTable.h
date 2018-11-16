@@ -14,6 +14,7 @@ public:
 	bool goToFirstPosition();							// Sucht die Position 0. (AN der Position 0 sind zwei Magnete hintereinander angebracht).
 	bool goToPosition(int pPosition);					// Geht an die angegebene Position.
 	bool goToNextPosition();							// Dreht den Drehteller an die naechste Position.
+	bool goToPrevPosition();							// Dreht den Drehteller in die vorherige Position.
 	int getPosition();									// Gibt die aktuelle Position des Drehtellers zurueck.
 	//bool risingEdge(bool pSignal, bool* pOldSignal);	// Gibt true bei einem Wechsel von false nach true zurück.
 	//bool fallingEdge(bool pSignal, bool* pOldSignal);	// Gibt true bei einem Wechsel von false nach true zurück.

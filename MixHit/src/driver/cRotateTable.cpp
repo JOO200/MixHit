@@ -135,6 +135,55 @@ bool cRotateTable::goToNextPosition()
 	#endif
 	return false;
 }
+
+bool cRotateTable::goToPrevPosition()
+{
+
+	Serial.println("GoToPreviousPosition");
+	mMotor.MotorStartL();
+	unsigned long lStartTime = millis(); // Startzeit speichern (damit im Fehlerfall nach einer gewissen Zeit abgebrochen werden kann).
+	unsigned long lMaxSearchTime = 30000; // 30sec - Zeit, nach der Abgebrochen wird falls die Position nicht gefunden wird.
+	bool lOldSignal = getMagnetSensorSignal(); // Beim Start der Funktion wird das vorhergehende Signal des Magnetsensors als das aktuelle angenommen.
+	unsigned long lMinDeltaTime = 500; // An der Position 1 sind zwei Magnete hintereinander. Falls also diese beiden Flanken weniger als 1sec voneinander Entfernt sind, ist es immernoch die Position 1 und nicht bereits die naechste.
+
+#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
+	while (millis() - lStartTime <= lMaxSearchTime)//&& (CheckNormalMode() || CheckInitMode())) // Solange die Maximale Suchzeit nicht ueberschritten wurde und sich die Maschiene im richtigen Zustand befindet.
+#else
+	while (millis() - lStartTime <= lMaxSearchTime && (CheckNormalMode() || CheckInitMode())) // Solange die Maximale Suchzeit nicht ueberschritten wurde und sich die Maschiene im richtigen Zustand befindet.
+#endif
+
+	{ // Es wird maximal "lMaxSearchTime" ms nach der naechsten Position gesucht. Dauert es laenger liegt ein Problem vor.
+
+		if (risingEdge(getMagnetSensorSignal(), &lOldSignal)) // Falls ein Uebergang des Magnetsensors von 0 auf 1 vorliegt (positive Flanke)
+		{
+			if (millis() - lStartTime > lMinDeltaTime) // Mindestsuchzeit abwarten
+			{
+				Serial.println("FoundNextPosition");
+				mCurrentPosition = (mCurrentPosition % NumberOfSlotsRotateTable) + -1; // Position um eins erhoehen (Werte: 1 ... NumberOfSlotsRotateTable)
+				//delay(700); // 0,5sec weiter drehen, damit die Position stimmt.
+				//vTaskDelay(700 / portTICK_RATE_MS);
+				mMotor.MotorStop();
+				//mMotor.MotorStartL(); // Zurueck drehen damit Glas frei steht
+				//delay(200);
+				//vTaskDelay(100 / portTICK_RATE_MS);
+#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
+				xTaskNotify(RFIDTask, ROTATE_OK, eSetValueWithOverwrite);
+#endif
+				return true;
+			}
+		}
+		delay(10); // Warten
+	}
+	// Falls die Position nicht gefunden wurde oder die Schleife aufgrund des Maschienenstatuses verlassen wurde.
+	gOLED.PrintFirstLine("Position nicht gefunden");
+	setMachineState(MachineState_ERROR_NaechstePositionNichtGefunden);
+	mMotor.MotorStop();
+#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
+	xTaskNotify(RFIDTask, ROTATE_FAIL, eSetValueWithOverwrite);
+#endif
+	return false;
+}
+
 int cRotateTable::getPosition()
 {
 	return mCurrentPosition;

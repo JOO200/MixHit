@@ -560,8 +560,41 @@ void loop_RFID(RFID rfid1)
 					RFIDSystemState = RFID_Idle;
 				}
 				else {
-					if (notificationValue == FILLING_GLASS_NOT_EMPTY) {
-						Serial.println("RFID: Glass is not empty!");
+					if (notificationValue == FILLING_GLASS_NOT_EMPTY) { // This part returns the Glass to the RFID tag, restores the status
+						Serial.println("RFID: Glass is not empty! Fixing  status"); // and return the glass to the filling position
+						gCocktailMixer.mRotateTable.goToPrevPosition();
+						if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+							ULONG_MAX, /* Reset the notification value to 0 on exit. */
+							&notificationValue, /* Notified value pass out in notificationValue. */
+							10000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+							!= pdTRUE) {
+							Serial.println("Could not find previous position!");
+						}
+						else {
+							byte RestoreStatus = 0xFF;
+							retries = 5;
+							do {
+								if (status == RFID_OK && !rfid1.setDrinkStatus(RestoreStatus, &secretKey)) {		// cannot write tag
+									status = RFID_FWRITECARD;
+									RFIDSystemState = RFID_DisplayError;
+								}
+								if (status == RFID_OK && !rfid1.getDrinkStatus(RestoreStatus, &secretKey)) {
+									status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
+									RFIDSystemState = RFID_DisplayError;
+								}
+
+							} while (--retries > 0 && RestoreStatus == 0xFF);
+							gCocktailMixer.mRotateTable.goToNextPosition();
+							if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+								ULONG_MAX, /* Reset the notification value to 0 on exit. */
+								&notificationValue, /* Notified value pass out in notificationValue. */
+								10000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+								!= pdTRUE) {
+								Serial.println("Could not find next position!");
+							}
+							RFIDSystemState = RFID_Idle;
+
+						}
 					}
 					else if (notificationValue == FILLING_OK) {
 
