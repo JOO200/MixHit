@@ -553,10 +553,12 @@ int cCocktailMixer::InitIngredient(int pIndex)
 }
 bool cCocktailMixer::isGlassEmpty()
 {
-	if (mScale.getWeight() <= WeightEmptyScale)
-		return true;
-	else
+	int lWeight = mScale.getWeight();
+	int GlassRV = mGlasses.checkGlasses(lWeight);
+	if(GlassRV == -1 || GlassRV == -2)
 		return false;
+	else
+		return true;
 }
 int cCocktailMixer::findEmptyGlass(int& pSlotNumber, int& pGlasIndex)
 {
