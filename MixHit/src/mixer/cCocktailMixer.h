@@ -44,7 +44,6 @@ public:
 	int mixCocktail_TEST(cCocktail pCocktail);					// Mixt einen Cocktail ungeachtet aller Sensorwerte (z.B. auch wenn kein Glas unter dem Ausschank steht.
 	int InitIngredients();										// Initialisiert alle Zutaten (siehe InitIngredient(...);
 	int InitIngredient(int pIndex);								// Initielisiert den angegebenen Zutatenvorrat (fuer die Werte zur Umrechnugn von Menge zu Zeit)
-	bool isGlassEmpty();
 	int findEmptyGlass(int& pSlotNumber, int& pGlasIndex);		// Sucht nach einem Leeren Glas.
 	int getSlotnummer(int pOrderNumber);					// Gibt die aktuelle Bestellnummer zurueck welche sich in dem Slot befindet.
 	int getSlotBestellnummer(int pSlotNumber);					// Gibt die aktuelle Bestellnummer zurueck welche sich in dem Slot befindet.
