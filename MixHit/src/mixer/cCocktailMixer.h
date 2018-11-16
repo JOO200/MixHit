@@ -45,6 +45,7 @@ public:
 	int InitIngredients();										// Initialisiert alle Zutaten (siehe InitIngredient(...);
 	int InitIngredient(int pIndex);								// Initielisiert den angegebenen Zutatenvorrat (fuer die Werte zur Umrechnugn von Menge zu Zeit)
 	int findEmptyGlass(int& pSlotNumber, int& pGlasIndex);		// Sucht nach einem Leeren Glas.
+	bool isGlassEmpty();
 	int getSlotnummer(int pOrderNumber);					// Gibt die aktuelle Bestellnummer zurueck welche sich in dem Slot befindet.
 	int getSlotBestellnummer(int pSlotNumber);					// Gibt die aktuelle Bestellnummer zurueck welche sich in dem Slot befindet.
 	String getSlotCocktailName(int pSlotNumber);					// Gibt den aktuellen Cocktailnamen zurueck welcher sich in dem Slot befindet.
