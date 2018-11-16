@@ -543,6 +543,13 @@ int cCocktailMixer::InitIngredient(int pIndex)
 		return ERROR_INIT_KeinGlasGefunden;
 	}
 }
+bool cCocktailMixer::isGlassEmpty()
+{
+	if (mScale.getWeight() <= WeightEmptyScale)
+		return true;
+	else
+		return false;
+}
 int cCocktailMixer::findEmptyGlass(int& pSlotNumber, int& pGlasIndex)
 {
 	Serial.println("FindEmptyGlass");
