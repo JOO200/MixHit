@@ -56,6 +56,16 @@ enum eRFIDErrorcode
 	RFID_FWRITECARD,		// Exception while trying to write the card
 	RFID_SELECTFAILED		// Could not select the found PICC
 };
+
+
+enum eRFIDTaskNotifications {
+	ROTATE_OK,
+	FILLING_OK,
+	ROTATE_FAIL,
+	FILLING_GLASS_NOT_EMPTY
+
+};
+
 #endif
 
 

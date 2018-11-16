@@ -79,14 +79,14 @@ bool cRotateTable::goToNextPosition()
 		if (!goToFirstPosition())
 		{ // Falls die Position 1 nicht gefunden wird
 #ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
-			xTaskNotify(RFIDTask, 0x10, eSetValueWithOverwrite);
+		//	xTaskNotify(RFIDTask, 0x10, eSetValueWithOverwrite);
 #endif
 			return false;
 		}
 		else
 		{
 #ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
-			xTaskNotify(RFIDTask, 0xFFFFFFFF, eSetValueWithOverwrite);
+			xTaskNotify(RFIDTask, ROTATE_OK, eSetValueWithOverwrite);
 #endif
 			return true;
 		}
@@ -119,7 +119,7 @@ bool cRotateTable::goToNextPosition()
 				//delay(200);
 				//vTaskDelay(100 / portTICK_RATE_MS);
 				#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
-				xTaskNotify(RFIDTask, 0xFFFFFFFF, eSetValueWithOverwrite);
+				xTaskNotify(RFIDTask, ROTATE_OK, eSetValueWithOverwrite);
 				#endif
 				return true;
 			}
@@ -131,7 +131,7 @@ bool cRotateTable::goToNextPosition()
 	setMachineState(MachineState_ERROR_NaechstePositionNichtGefunden);
 	mMotor.MotorStop();
 	#ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
-	xTaskNotify(RFIDTask, 0x10, eSetValueWithOverwrite);
+	xTaskNotify(RFIDTask, ROTATE_FAIL, eSetValueWithOverwrite);
 	#endif
 	return false;
 }

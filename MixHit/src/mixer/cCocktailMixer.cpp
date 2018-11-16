@@ -358,7 +358,12 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 	mCurrentOrderNumber = pBestellung.getOrderNumber(); // Letzte bearbeitete Bestellnummer aktuallisieren.
 	int lSlotNumber;
 	int lGlassIndex;
+
+#ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 	if (findEmptyGlass(lSlotNumber, lGlassIndex) >= findEmptyGlass_OK) // Suche nach einem leeren Glas
+#else
+	if (isGlassEmpty()) // Prüfe ob das Glas mit RFID Tag leer ist.
+#endif
 	{ // Falls ein leeres Glas gefunden wurde
 		gOLED.PrintFirstLine("Leeres Glas gefunden");
 		cCocktail lCocktail = pBestellung.getCocktail(); // Cocktail aus der Bestellung lokal speichern.
@@ -402,13 +407,15 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 #ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 		mRotateTable.goToNextPosition(); // Drehteller eine Position weiter rotieren.
 #else
-		xTaskNotify(RFIDTask, 0xFFFFFFFF, eSetValueWithOverwrite);
+		xTaskNotify(RFIDTask, 0x01, eSetValueWithOverwrite);
 #endif
-
 		return mixCocktail_OK;
 	}
 	else
 	{
+#ifdef OPERATION_MODE_CM_IOT //Add Task notification 
+		xTaskNotify(RFIDTask, 0x20, eSetValueWithOverwrite);
+#endif
 		return ERROR_mixCocktail_KeinGlasGefunden;
 	}
 }
