@@ -92,6 +92,7 @@ void loop_CocktailMixer()
 #ifndef REGION_NormalMode
 		if (CheckNormalMode())
 		{
+			//
 			gCocktailMixer.mixNextCocktail();
 		}
 #endif
@@ -437,7 +438,7 @@ void loop_RFID(RFID rfid1)
 				}
 			}
 			else
-				vTaskDelay(30 / portTICK_RATE_MS); // Pause Task for 30ms
+				vTaskDelay(200 / portTICK_RATE_MS); // Pause Task for 30ms
 			break;
 		case RFID_Reading:
 			Serial.println("RFID: Reading");

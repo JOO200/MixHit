@@ -281,6 +281,7 @@ int cCocktailMixer::mixNextCocktail()
 {
 	if (CheckNormalMode()) // Pruefen ob sich sich die Maschiene im richtigen Betriebsmodus befindet.
 	{
+
 		gOLED.PrintFirstLine("Cocktail aus Warteschlange"); // Statusmeldung
 		int lReturnValue = 0;
 		cOrder lOrder;
