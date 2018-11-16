@@ -407,14 +407,14 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 #ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 		mRotateTable.goToNextPosition(); // Drehteller eine Position weiter rotieren.
 #else
-		xTaskNotify(RFIDTask, 0x01, eSetValueWithOverwrite);
+		xTaskNotify(RFIDTask, FILLING_OK, eSetValueWithOverwrite);
 #endif
 		return mixCocktail_OK;
 	}
 	else
 	{
 #ifdef OPERATION_MODE_CM_IOT //Add Task notification 
-		xTaskNotify(RFIDTask, 0x20, eSetValueWithOverwrite);
+		xTaskNotify(RFIDTask, FILLING_GLASS_NOT_EMPTY, eSetValueWithOverwrite);
 #endif
 		return ERROR_mixCocktail_KeinGlasGefunden;
 	}
