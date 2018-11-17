@@ -215,7 +215,7 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 	vector<String> CocktailNames;
 	vector<int> IngriedentsAmounts;
 	int OrderedAmount;						// 1: half, 2: full
-	int OrderPrio = 0;// (data.Status & 0xFF);	// get the upper 8 bits of status
+	int OrderPrio = 2;// (data.Status & 0xFF);	// get the upper 8 bits of status
 	int recvdOrderNr;
 	int total_ml = 0;
 	extern cCocktailMixer gCocktailMixer;

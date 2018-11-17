@@ -8,8 +8,9 @@
 #include "MFRC522.h"
 #include "MFRC522Debug.h"
 #include "src/libs/MyMutex.h"
+#include "./src/mixer/Configuration.h"
 
-
+extern TwoWire I2Ctwo;
 /////////////////////////////////////////////////////////////////////////////////////
 // Functions for setting up the Arduino
 /////////////////////////////////////////////////////////////////////////////////////
@@ -47,12 +48,20 @@ MFRC522::MFRC522(	byte chipAddress,
 void MFRC522::PCD_WriteRegister(	PCD_Register reg,		///< The register to write to. One of the PCD_Register enums.
 									byte value		///< The value to write.
 								) {
-	MyMutex_I2C_lock();
-	Wire.beginTransmission(_chipAddress);
-	Wire.write((byte)reg>>1);
-	Wire.write(value);
-	Wire.endTransmission();
-	MyMutex_I2C_unlock();
+	/*MyMutex_I2C_lock();
+	I2Ctwo.beginTransmission(_chipAddress);
+	I2Ctwo.write((byte)reg>>1);
+	I2Ctwo.write(value);
+	I2Ctwo.endTransmission();
+	MyMutex_I2C_unlock();*/
+
+	byte buffer[2];
+
+	 buffer[0] = (byte)reg >> 1;
+	 buffer[1] = value;
+
+	I2Ctwo.writeTransmission(_chipAddress, buffer, 2, true);
+
 } // End PCD_WriteRegister()
 
 /**
@@ -63,14 +72,29 @@ void MFRC522::PCD_WriteRegister(	PCD_Register reg,		///< The register to write t
 									byte count,		///< The number of bytes to write to the register
 									byte *values	///< The values to write. Byte array.
 								) {
-	MyMutex_I2C_lock();
-	Wire.beginTransmission(_chipAddress);
-	Wire.write((byte)reg>>1);
+
+
+	/*I2Ctwo.beginTransmission(_chipAddress);
+	I2Ctwo.write((byte)reg>>1);
 	for (byte index = 0; index < count; index++) {
-		Wire.write(values[index]);
+		I2Ctwo.write(values[index]);
 	}
-	Wire.endTransmission();
-	MyMutex_I2C_unlock();
+	I2Ctwo.endTransmission();*/
+	
+	byte address = (byte)reg >> 1;
+
+
+	uint8_t buffer[128];
+
+	buffer[0] = (byte)reg >> 1;
+
+	for (int i = 0; i < count; i++)
+		buffer[i + 1] = values[i];
+
+
+
+	I2Ctwo.writeTransmission(_chipAddress, buffer, count+1, true);
+	
 } // End PCD_WriteRegister()
 
 /**
@@ -80,15 +104,22 @@ void MFRC522::PCD_WriteRegister(	PCD_Register reg,		///< The register to write t
 byte MFRC522::PCD_ReadRegister(	PCD_Register reg	///< The register to read from. One of the PCD_Register enums.
 								) {
 	byte value;
-	//digitalWrite(_chipSelectPin, LOW);			// Select slave
-	MyMutex_I2C_lock();
-	Wire.beginTransmission(_chipAddress);
-	Wire.write((byte)reg>>1);
-	Wire.endTransmission();
+	byte address = (byte)reg >> 1;
 
-	Wire.requestFrom((uint8_t)_chipAddress, (uint8_t)1);
-	value = Wire.read();
-	MyMutex_I2C_unlock();
+	//digitalWrite(_chipSelectPin, LOW);			// Select slave
+	I2Ctwo.beginTransmission(_chipAddress);
+	I2Ctwo.write((byte)reg>>1);
+	I2Ctwo.endTransmission();
+
+	I2Ctwo.requestFrom((uint8_t)_chipAddress, (uint8_t)1);
+	value = I2Ctwo.read();
+
+
+
+	//I2Ctwo.writeTransmission(_chipAddress, &address, 1, true);
+	//I2Ctwo.readTransmission(_chipAddress, &value, 1, true);
+
+
 	return value;
 } // End PCD_ReadRegister()
 
@@ -106,12 +137,15 @@ void MFRC522::PCD_ReadRegister(	PCD_Register reg,		///< The register to read fro
 	}
 	byte address = (byte)reg>>1;
 	byte index = 0;							// Index in values array.
-	MyMutex_I2C_lock();
-	Wire.beginTransmission(_chipAddress);
-	Wire.write(address);
-	Wire.endTransmission();
-	Wire.requestFrom((uint8_t)_chipAddress, (uint8_t)count);
-	while (Wire.available()) {
+
+	byte buffer[128];
+
+
+	I2Ctwo.writeTransmission(_chipAddress, &address, 1, true);
+	I2Ctwo.readTransmission(_chipAddress, buffer, count, true);
+
+
+	while (index < count) {
 		if (index == 0 && rxAlign) {		// Only update bit positions rxAlign..7 in values[0]
 			// Create bit mask for bit positions rxAlign..7
 			byte mask = 0;
@@ -119,16 +153,43 @@ void MFRC522::PCD_ReadRegister(	PCD_Register reg,		///< The register to read fro
 				mask |= (1 << i);
 			}
 			// Read value and tell that we want to read the same address again.
-			byte value = Wire.read();
+			byte value = buffer[index];
 			// Apply mask to both current value of values[0] and the new data in value.
 			values[0] = (values[index] & ~mask) | (value & mask);
 		}
 		else { // Normal case
-			values[index] = Wire.read();
+			values[index] = buffer[index];
+		}
+
+		index++;
+	}
+
+	/*
+	I2Ctwo.beginTransmission(_chipAddress);
+	I2Ctwo.write(address);
+	I2Ctwo.endTransmission();
+	I2Ctwo.requestFrom((uint8_t)_chipAddress, (uint8_t)count);
+
+	while (I2Ctwo.available()) {
+		if (index == 0 && rxAlign) {		// Only update bit positions rxAlign..7 in values[0]
+			// Create bit mask for bit positions rxAlign..7
+			byte mask = 0;
+			for (byte i = rxAlign; i <= 7; i++) {
+				mask |= (1 << i);
+			}
+			// Read value and tell that we want to read the same address again.
+			byte value = I2Ctwo.read();
+			// Apply mask to both current value of values[0] and the new data in value.
+			values[0] = (values[index] & ~mask) | (value & mask);
+		}
+		else { // Normal case
+			values[index] = I2Ctwo.read();
 		}
 		index++;
 	}
-	MyMutex_I2C_unlock();
+	*/
+
+	//MyMutex_I2C_unlock();
 } // End PCD_ReadRegister()
 
 /**

@@ -30,6 +30,8 @@ extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
  /*Define Pins and enums if CM is in IOT mode*/
 #ifdef OPERATION_MODE_CM_IOT
 extern TaskHandle_t RFIDTask;
+extern SemaphoreHandle_t i2cSemaphore;
+
 
 #define RFID_READER_ADDR 0x28
 #define RFID_READER_RST 15
@@ -41,6 +43,7 @@ enum eRFIDStateMachine
 	RFID_RotateTable,		// Rotate table
 	RFID_Reading,			// Supervise table rotation
 	RFID_Filling,			// Mixing Cocktail
+	RFID_CheckForWaitingGlass, //check if a new glass is ready
 	RFID_DisplayError		// Display error messages of SM
 };
 
@@ -70,7 +73,7 @@ enum eRFIDTaskNotifications {
 
 
 #define I2C_SX1509address 0x3E
-#define I2C_OLEDaddress 0x3C
+#define I2C_OLEDaddress 0x78//0x3C
 
 #ifndef REGION_MixHit_Infos
 #ifndef FillSIZE
@@ -117,8 +120,8 @@ enum eRFIDTaskNotifications {
 #define RESOLUTION 8									// Resolution
 
 #define PinServoPWM 32
-#define ServoPosAktiv 45
-#define ServoPosDeaktiv 49
+#define ServoPosAktiv 20
+#define ServoPosDeaktiv 170
 
 #define PinSX1509Valve_0 7 
 #define PinSX1509Valve_1 0

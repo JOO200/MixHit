@@ -21,6 +21,7 @@ void loop_3(void * pvParameters);
 #ifdef OPERATION_MODE_CM_IOT
 void loop_4(void * pvParameters);
 TaskHandle_t RFIDTask;
+SemaphoreHandle_t i2cSemaphore;
 #endif
 
 // the setup function runs once when you press reset or power the board
@@ -81,6 +82,11 @@ void setup()
 	gOLED.DisplayLines();
 	setup_WebServer();
 	setup_CocktailMixer();
+	 
+		
+	i2cSemaphore = xSemaphoreCreateBinary();
+
+
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
 	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
@@ -88,6 +94,8 @@ void setup()
 	
 	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, &RFIDTask, 0);
 #endif
+
+	Wire.setClock(200000);
 }
 
 // the loop function runs over and over again until power down or reset
@@ -123,9 +131,11 @@ void loop_3(void * pvParameters)
 }
 #ifdef OPERATION_MODE_CM_IOT
 
+TwoWire I2Ctwo = TwoWire(1);
+
 void loop_4(void * pvParameters)
 {
-
+	I2Ctwo.begin(4, 5, 100000);
 	// GPIO expander and OLED driver have already initialized the i2c bus
 	RFID rfid1(RFID_READER_ADDR, RFID_READER_RST);
 	rfid1.PCD_Init();   // Init MFRC522

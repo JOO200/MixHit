@@ -8,13 +8,13 @@ cScale::cScale(byte pPinScaleData, byte pPinScaleCLK)
 {
 	mHX711Scale = HX711(pPinScaleData, pPinScaleCLK);
 	//mHX711Scale.set_scale(1);
-	mTare = 650.3619;
+	mTare = 650.3619+24;
 }
 double cScale::getWeight()
 {
 
 
-	return (double)mHX711Scale.get_units(10) * 0.0009551 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
+	return (double)mHX711Scale.get_units(10) * 0.0047733 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
   //return (double)mHX711Scale.get_units(10); // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
 
 
@@ -23,7 +23,7 @@ double cScale::getWeight(int pPoints)
 {
 
 
-	return (double)mHX711Scale.get_units(pPoints) * 0.0009551 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
+	return (double)mHX711Scale.get_units(pPoints) * 0.0047733 - mTare; // Cast als Double, damit das Zwischenergebniss nicht gerundet wird.
 
 
 }

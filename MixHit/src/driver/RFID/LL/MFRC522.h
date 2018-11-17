@@ -83,6 +83,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+
 // Firmware data for self-test
 // Reference values based on firmware version
 // Hint: if needed, you can remove unused self-test data to save flash memory
