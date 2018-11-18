@@ -27,6 +27,8 @@ int cCocktailMixer::addOrderToQueue(cOrder pBestellung)
 	pBestellung.setOrderNumber(lOrderNumber);
 	mNextOrderNumber++;			// Naechste moegliche Bestellnummer berechnen.
 	bool ReturnValue = mQueue[pBestellung.getPrio()].addOrder(pBestellung); // Bestellung ggf. der Warteschlange hinzufuegen (false, falls Liste bereits voll).
+
+
 	MyMutex_mQueue_unlock();	// Bereich wieder freigeben
 	if (ReturnValue)
 	{
@@ -279,6 +281,7 @@ int cCocktailMixer::mixNextCocktail()
 {
 	if (CheckNormalMode()) // Pruefen ob sich sich die Maschiene im richtigen Betriebsmodus befindet.
 	{
+
 		gOLED.PrintFirstLine("Cocktail aus Warteschlange"); // Statusmeldung
 		int lReturnValue = 0;
 		cOrder lOrder;
@@ -291,7 +294,7 @@ int cCocktailMixer::mixNextCocktail()
 		else // Falls sich keine Bestellung in der Warteschlange mit der hoechsten Prioritaet befindet.
 		{
 			if (mQueue[1].getNumberOfOrders() > 0 && mQueue[0].getNumberOfOrders() > 0) // Falls sowohl in der Warteschlange mit mittlerer und mit niedrigster Prioritaet Bestellungen sind.
-			{   // Hier wird die Warteschlange mit mittlerer Prioritaet 3x heufiger bedient als die mit niedriger Prioritaet.
+			{   // Hier wird die Warteschlange mit mittlerer Prioritaet 3x haeufiger bedient als die mit niedriger Prioritaet.
 				// Wenn lCounter 0, 1, 2 ist wird die Warteschlange mit mittlerer Prioritaet bedient.
 				// Wenn lCounter 3 ist wird die mit niedriger Priotitaet bedient.
 				//static int lCounter = 0; // Mit 0 wird nur beim aller ersten mal aufrufen initialisiert, danach behaelt die Variable ihren Wert den sie nachfolgend zugewiesen bekommt, auch nach Verlasen der Funktion (static).
@@ -355,7 +358,12 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 	mCurrentOrderNumber = pBestellung.getOrderNumber(); // Letzte bearbeitete Bestellnummer aktuallisieren.
 	int lSlotNumber;
 	int lGlassIndex;
+
+#ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 	if (findEmptyGlass(lSlotNumber, lGlassIndex) >= findEmptyGlass_OK) // Suche nach einem leeren Glas
+#else
+	if (isGlassEmpty()) // Prüfe ob das Glas mit RFID Tag leer ist.
+#endif
 	{ // Falls ein leeres Glas gefunden wurde
 		gOLED.PrintFirstLine("Leeres Glas gefunden");
 		cCocktail lCocktail = pBestellung.getCocktail(); // Cocktail aus der Bestellung lokal speichern.
@@ -384,11 +392,11 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 
 
 		gOLED.PrintFirstLine("Cocktail mixen");
-		mServo.goToPosition_Open();
+		mServo.Aktivieren();
 		gCocktailMixer.WaitMillis(1000);
 		mValveControl.setValveState(lReservoirIndices, lTimes, lNumberOfIngredients); // Liste der Ventile und Zeiten an die Ventilsteuerung uebergeben.
 		WaitMillis(2000);//DEFAULT 1000
-		mServo.goToPosition_Close();
+		mServo.Deaktivieren();
 		mAmountOfMixedCocktails++; // Anzahl an gemixten Cocktails erhoehen (fuer die Statistik).
 		double lEndWeight = mScale.getWeight(); // Endgewicht ermitteln
 		Serial.println("Weight Difference: " + String(lEndWeight - lStartWeight));
@@ -396,11 +404,18 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 		mSlotOrderNumber[lSlotNumber - 1] = pBestellung.getOrderNumber(); // -1, da lSlotNumber bei 1 beginnt. Bestellnummer dem Slot zuordnen, in dem der Cocktail gemixt wurde.
 		mSlotCocktailName[lSlotNumber - 1] = pBestellung.getCocktail().getCocktailName(); // -1, da lSlotNumber bei 1 beginnt. Cocktailname dem Slot zuordnen, in dem der Cocktail gemixt wurde.
 		
+#ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 		mRotateTable.goToNextPosition(); // Drehteller eine Position weiter rotieren.
+#else
+		xTaskNotify(RFIDTask, FILLING_OK, eSetValueWithOverwrite);
+#endif
 		return mixCocktail_OK;
 	}
 	else
 	{
+#ifdef OPERATION_MODE_CM_IOT //Add Task notification 
+		xTaskNotify(RFIDTask, FILLING_GLASS_NOT_EMPTY, eSetValueWithOverwrite);
+#endif
 		return ERROR_mixCocktail_KeinGlasGefunden;
 	}
 }
@@ -469,7 +484,7 @@ int cCocktailMixer::InitIngredient(int pIndex)
 
 
 		double lStartWeight = mScale.getWeight();
-		mServo.goToPosition_Open();
+		mServo.Aktivieren();
 		WaitMillis(1000);
 		unsigned long lStartTime = millis();
 		unsigned long lMaxInitTime = 30000; // Maximale Zeit zum Initialisieren. Dauert die Initialisierung laenger, ist vermutlich der Vorratsbehaelter leer.
@@ -494,13 +509,13 @@ int cCocktailMixer::InitIngredient(int pIndex)
 				
 				gCocktailMixer.mValveControl.setValveState(pIndex, false);
 				delay(1000);
-				mServo.goToPosition_Close();
+				mServo.Deaktivieren();
 				return MachineState_ERROR_AnlagenStatus;
 			}
 		}
 		gCocktailMixer.mValveControl.setValveState(pIndex, false);
 		WaitMillis(1000);
-		mServo.goToPosition_Close();
+		mServo.Deaktivieren();
 		if (lTempWeight < lFillWeight) 
 		{ // Falls die Zeit abgelaufen ist und das gewicht noch nicht erreicht wurde.
 			setMachineState(MachineState_ERROR_VorratLeer);
@@ -535,6 +550,15 @@ int cCocktailMixer::InitIngredient(int pIndex)
 	{
 		return ERROR_INIT_KeinGlasGefunden;
 	}
+}
+bool cCocktailMixer::isGlassEmpty()
+{
+	int lWeight = mScale.getWeight();
+	int GlassRV = mGlasses.checkGlasses(lWeight);
+	if(GlassRV == -1 || GlassRV == -2)
+		return false;
+	else
+		return true;
 }
 int cCocktailMixer::findEmptyGlass(int& pSlotNumber, int& pGlasIndex)
 {

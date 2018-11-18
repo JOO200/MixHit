@@ -333,6 +333,6 @@ void CloseValvesStopMotor()
 	{
 		gCocktailMixer.mValveControl.setValveState(i, false);
 	}
-	gCocktailMixer.mServo.goToPosition_Close();
+	gCocktailMixer.mServo.Deaktivieren();
 }
 #endif

@@ -14,12 +14,21 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 #include "MyMutex.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "src/mixer/Configuration.h"
+#include "esp32-hal-i2c.h"
+
 
 volatile bool mIsLocked_1 = false;
 volatile bool mIsLocked_2 = false;
 volatile bool mIsLocked_3 = false;
 volatile bool mIsLocked_4 = false;
 volatile bool mIsLocked_5 = false;
+//extern i2c;
+
+//#define I2C_MUTEX_LOCK()    
+//#define I2C_MUTEX_UNLOCK()  
 
 bool interlockedExchange_1(bool v)
 {
@@ -29,6 +38,7 @@ bool interlockedExchange_1(bool v)
 }
 void MyMutex_mQueue_lock()
 {
+	
 	bool prev;
 	while (1)
 	{
@@ -101,20 +111,33 @@ bool interlockedExchange_4(bool v)
 }
 void MyMutex_I2C_lock()
 {
+
+	//do {} while (xSemaphoreTake(i2cSemaphore, portMAX_DELAY) != pdPASS);
+	//I2C_MUTEX_LOCK();
+	//xSemaphoreTake(i2cSemaphore,1000/portTICK_RATE_MS);
+	
+	
+	//Serial.println("MutexLocked");
 	bool prev;
 	while (1)
 	{
 		while (mIsLocked_4) {};
 
 		prev = interlockedExchange_4(true);
-
+		//vTaskPrioritySet(NULL, 5);
 		if (!prev)
 			break;
 	}
+	
 }
 void MyMutex_I2C_unlock()
 {
+	//xSemaphoreGive(i2cSemaphore);
+	//xSemaphoreGive(i2cSemaphore);
+	//Serial.println("Mutex Unlocked");
 	interlockedExchange_4(false);
+	//vTaskPrioritySet(NULL, 1);
+	
 }
 
 bool interlockedExchange_5(bool v)

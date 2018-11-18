@@ -4,18 +4,25 @@
  Author:	User
 */
 
-#include <BluetoothSerial.h>
-#include <SPIFFS.h>
-#include <SparkFunSX1509.h>
-#include <Wire.h>
+//#include <BluetoothSerial.h>
+//#include <SPIFFS.h>
+//#include <SparkFunSX1509.h>
+//#include <Wire.h>
 #include <dummy.h>
-#include "WiFi.h"
+//#include "WiFi.h"
 #include "src/mixer/Main_CocktailMixer.h"
 #include "src/web/Main_WebServer.h"
+#include "src/driver/RFID/RFID.h"
 
 void loop_1(void * pvParameters);
 void loop_2(void * pvParameters);
 void loop_3(void * pvParameters);
+
+#ifdef OPERATION_MODE_CM_IOT
+void loop_4(void * pvParameters);
+TaskHandle_t RFIDTask;
+SemaphoreHandle_t i2cSemaphore;
+#endif
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -75,9 +82,20 @@ void setup()
 	gOLED.DisplayLines();
 	setup_WebServer();
 	setup_CocktailMixer();
+	 
+		
+	i2cSemaphore = xSemaphoreCreateBinary();
+
+
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
 	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
+#ifdef OPERATION_MODE_CM_IOT
+	
+	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, &RFIDTask, 0);
+#endif
+
+	Wire.setClock(200000);
 }
 
 // the loop function runs over and over again until power down or reset
@@ -97,11 +115,11 @@ void loop_2(void * pvParameters)
 	while (true)
 	{
 		loop_WebServer();
-		if (WiFi.status() != WL_CONNECTED)
+		/*if (WiFi.status() != WL_CONNECTED)
 		{
 			delay(500);
 			setup_WebServer();
-		}
+		}*/
 	}
 }
 void loop_3(void * pvParameters)
@@ -111,3 +129,38 @@ void loop_3(void * pvParameters)
 		loop_OLED();
 	}
 }
+#ifdef OPERATION_MODE_CM_IOT
+
+TwoWire I2Ctwo = TwoWire(1);
+
+void loop_4(void * pvParameters)
+{
+	I2Ctwo.begin(4, 5, 100000);
+	// GPIO expander and OLED driver have already initialized the i2c bus
+	RFID rfid1(RFID_READER_ADDR, RFID_READER_RST);
+	rfid1.PCD_Init();   // Init MFRC522
+
+	// check reade version
+	byte version = rfid1.PCD_ReadRegister(rfid1.VersionReg);
+	Serial.print("RFID Reader Version:");
+	Serial.println(version,HEX);
+	if (version == (byte)0x92) {
+		loop_RFID(rfid1);
+		
+	}
+	else {
+		Serial.println("RFID: reader version unknown!");
+		if (version == 0x00 || version == 0xFF) {
+			Serial.println("RFID: reader does not respond!");
+		}
+	}while (true)
+	{
+		vTaskDelay(100);
+	}
+
+	
+
+		
+
+}
+#endif

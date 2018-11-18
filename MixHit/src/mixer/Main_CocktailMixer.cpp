@@ -12,14 +12,22 @@
 // ###############################################################################
 
 #include "Main_CocktailMixer.h"
-
-
+#include "Configuration.h"
+extern TwoWire I2Ctwo;
 cCocktailMixer gCocktailMixer;
 bool LogActive = false;
 
+//i2c_t *hi2c1;
+
+
 void setup_CocktailMixer()
 {
-	#ifndef LoadFile
+#ifndef LoadFile
+
+
+	//hi2c1 = i2cInit(0,22,21,20000);
+	//i2cFlush(hi2c1);
+
 	String lConfigFileName = "";
 	readFile(SPIFFS, "/Config_Select.txt", &lConfigFileName); // Liest ein, welche Config-Datei geladen werden soll.
 	if (lConfigFileName == "")
@@ -30,21 +38,21 @@ void setup_CocktailMixer()
 	writeFile(SPIFFS, "/Config_Select.txt", "/Default_Config.txt");	// Zur�cksetzen auf Default (dass falls die aktuelle Config beschaedigt ist, nach einem Reset wieder die Default geladen wird - Damit der Controler nicht staendeig die fehlerhafte Datei laed und resetet).
 	LoadConfigFile(lConfigFileName);
 	writeFile(SPIFFS, "/Config_Select.txt", lConfigFileName); // Falls beim Laden alles in Ordnung war (und das Programm nicht abstuerzt) wird die Config_Select wieder auf den Urspruenglichen Wert gesetzt.
-	#endif	
-	#ifndef REGON_Menue
+#endif	
+#ifndef REGON_Menue
 	create_Menue();
 	Serial.println("Menue_OK");
-	#endif
-	#ifndef REGION_SparkFun
+#endif
+#ifndef REGION_SparkFun
 	Init_SparkFun();
 	Serial.println("SparkFun_OK");
-	#endif
-	#ifndef REGION_PinModes
+#endif
+#ifndef REGION_PinModes
 	AttacheInterrupts();
 	//AttacheInterrupts(); // Aktiviert die Interrupts und legt die PinModes fest.
 	Serial.println("Interrupts_OK");
-	#endif
-	gCocktailMixer.mServo.goToPosition_Close();
+#endif
+	gCocktailMixer.mServo.Deaktivieren();
 }
 
 void loop_CocktailMixer()
@@ -55,16 +63,16 @@ void loop_CocktailMixer()
 		Serial.println("$ACCLOG\r");
 		LogActive = true;
 	}*/
-	#ifndef REGION_SwitchMachineStates
-	#ifndef Global_To_Local_EVA_Prinzip
+#ifndef REGION_SwitchMachineStates
+#ifndef Global_To_Local_EVA_Prinzip
 	static int lMachineState = MachineState_OK;
 	static int lOldMachineState = MachineState_OK;
 	lMachineState = getMachineState(); // globale Variable lokal Speichern, damit diese sich lokal waehrend diesem Durchlauf nicht mehr aendert.
 	lOldMachineState = getOldMachineState(); // globale Variable lokal Speichern, damit diese sich lokal waehrend diesem Durchlauf nicht mehr aendert.
-	#ifndef REGION_StartStoppTaster
+#ifndef REGION_StartStoppTaster
 	if (digitalRead(PinONOFF) == 1)
 	{ // Falls der Stop-Taster offen ist, bzw. ein Drahtbruch vorliegt, liegt am Pin ein High-Signal an (wegen internem PullUp). In diesem Fall liegt ein Fehler vor.
-		
+
 		STOP_Mode = true; // Falls der Stop-Taster auf Stopp steht, kann die Maschine nicht weiter bedient werden.
 		setMachineState(MachineState_ERROR_NotAus);
 		lMachineState = MachineState_ERROR_NotAus;
@@ -74,34 +82,35 @@ void loop_CocktailMixer()
 	{ // Falls der Stop-Taster nicht auf Stopp steht
 		if (lMachineState == MachineState_ERROR_NotAus)
 		{ // Falls die Maschine aktuell im Stopp-Modus ist, wird diese nun wieder in den Zustand OK gesetzt, damit diese nun wieder bedient werden kann.
-			
+
 			lMachineState = MachineState_OK;
 			setMachineState(MachineState_OK);
 			gOLED.PrintFirstLine("");
 		}
 		STOP_Mode = false;
 	}
-	#endif
-	#endif
+#endif
+#endif
 	if (lMachineState >= 0) // Prueft ob ein Fehler vorliegt oder nicht. (< 0 sind Fehler).
 	{
 		if (lOldMachineState < 0)
 		{ // Fals der letzte Zustand ein Fehlerzustand war, wird nun die Fehlermeldung auf dem Display aufgehoben.
 			gOLED.PrintFirstLine("");
 		}
-		#ifndef REGION_NormalMode
+#ifndef REGION_NormalMode
 		if (CheckNormalMode())
 		{
+			//
 			gCocktailMixer.mixNextCocktail();
 		}
-		#endif
-		#ifndef REGION_ResetESP
+#endif
+#ifndef REGION_ResetESP
 		if (lMachineState == MachineState_Reset)
 		{
 			ESP.restart();
 		}
-		#endif
-		#ifndef REGION_Werkseinstellungen
+#endif
+#ifndef REGION_Werkseinstellungen
 		if (lMachineState == MachineState_Einstellungen_Werkseinstellung)
 		{
 			gOLED.PrintFirstLine("Werkseinstellung laden...");
@@ -121,15 +130,15 @@ void loop_CocktailMixer()
 			//writeFile(SPIFFS, "/Config_Select.wtxt", "/Default_Config.wtxt"); // Default_Config als zu ladende Datei festlegen
 			ESP.restart(); // Neustart
 		}
-		#endif
-		#ifndef REGION_Betriebsmodus
+#endif
+#ifndef REGION_Betriebsmodus
 		if (lMachineState == MachineState_Betriebsmodus)
 		{
 			gOLED.PrintFirstLine("");
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_InitAll
+#endif
+#ifndef REGION_InitAll
 		if (lMachineState == MachineState_Einstellungen_InitAll)
 		{
 			if (gCocktailMixer.InitIngredients() == gCocktailMixer.mReservoir.getNumberOfReservoir())
@@ -138,8 +147,8 @@ void loop_CocktailMixer()
 			}
 			setMachineState(MachineState_Einstellungen);
 		}
-		#endif
-		#ifndef REGION_InitSingle
+#endif
+#ifndef REGION_InitSingle
 		if (lMachineState >= MachineState_Einstellungen_InitSingle && lMachineState < MachineState_Einstellungen_InitSingle + MaxNumberOfReservoir)
 		{
 			if (gCocktailMixer.InitIngredient(lMachineState - MachineState_Einstellungen_InitSingle) >= 0)
@@ -148,8 +157,8 @@ void loop_CocktailMixer()
 			}
 			setMachineState(MachineState_Einstellungen);
 		}
-		#endif
-		#ifndef REGION_TestMode_RotateTableR
+#endif
+#ifndef REGION_TestMode_RotateTableR
 		if (lMachineState == MachineState_TestMode_RotateTableR)
 		{
 			gCocktailMixer.mRotateTable.mMotor.MotorStartR();
@@ -178,8 +187,8 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		#endif
-		#ifndef REGION_TestMode_RotateTableL
+#endif
+#ifndef REGION_TestMode_RotateTableL
 		if (lMachineState == MachineState_TestMode_RotateTableL)
 		{
 			gCocktailMixer.mRotateTable.mMotor.MotorStartL();
@@ -208,20 +217,20 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		#endif
-		#ifndef REGION_TestMode_Valve
+#endif
+#ifndef REGION_TestMode_Valve
 		if (lMachineState == MachineState_TestMode_Valve)
 		{ // Falls die Ventile getestet werden sollen.
 			for (int i = 0; i < MaxNumberOfReservoir; i++)
 			{
 				gCocktailMixer.mValveControl.setValveState(i, false); // Falls im Menue das aktuelle Ventil ausgewaehlt ist, wird das Ventil geoeffnet, andernfalls geschlossen
 			}
-			gCocktailMixer.mServo.goToPosition_Open();
+			gCocktailMixer.mServo.Aktivieren();
 			gOLED.PrintFirstLine("Geschlossen");
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_TestMode_ValveOpen
+#endif
+#ifndef REGION_TestMode_ValveOpen
 		if (lMachineState == MachineState_TestMode_ValveOpen)
 		{ // Falls die Ventile getestet werden sollen.
 			for (int i = 0; i < MaxNumberOfReservoir; i++)
@@ -241,8 +250,8 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		#endif
-		#ifndef REGION_TestMode_Scale_Tare
+#endif
+#ifndef REGION_TestMode_Scale_Tare
 		if (lMachineState == MachineState_TestMode_ScaleTare)
 		{
 			gCocktailMixer.mScale.Tare();
@@ -252,8 +261,8 @@ void loop_CocktailMixer()
 			setMachineState(MachineState_TestMode_Scale);
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_TestMode_Scale
+#endif
+#ifndef REGION_TestMode_Scale
 		if (lMachineState == MachineState_TestMode_Scale)
 		{
 			Serial.println("Scale_Now");
@@ -262,27 +271,27 @@ void loop_CocktailMixer()
 			gOLED.PrintFirstLine("Gewicht: " + String(Scale_Weight) + "g"); // Anzeigen des Gewichtes in der ersten Zeile des Displays
 			delay(100);
 		}
-		#endif
-		#ifndef REGION_TestMode_Servo0
+#endif
+#ifndef REGION_TestMode_Servo0
 		if (lMachineState == MachineState_TestMode_Servo0)
 		{
-			gCocktailMixer.mServo.goToPosition_Close();
+			gCocktailMixer.mServo.Deaktivieren();
 		}
-		#endif
-		#ifndef REGION_TestMode_RotateTableL
+#endif
+#ifndef REGION_TestMode_RotateTableL
 		if (lMachineState == MachineState_TestMode_Servo1)
 		{
-			gCocktailMixer.mServo.goToPosition_Open();
+			gCocktailMixer.mServo.Aktivieren();
 		}
-		#endif
-		#ifndef REGION_TestMode
+#endif
+#ifndef REGION_TestMode
 		if (lMachineState == MachineState_TestMode)
 		{ // Falls der TestModus aktiv ist, aber nichts ausgewaehlt wurde.
 			gOLED.PrintFirstLine("Test_Mode");
 			CloseValvesStopMotor(); // Alle Ventile schlie�en udn Motor stoppen.
 			delay(100);
 		}
-		#endif
+#endif
 	}
 	else
 	{ // Falls ein Fehler vorliegt.
@@ -296,18 +305,18 @@ void loop_CocktailMixer()
 			gMenue.selectMenueItem(lSelectedPath_0, 1);
 			gMenue.mSelectedMenueItem->mSelectedIndex = 0; // mSelectedIndex auf 0 setzen.
 			MyMutex_MenueItems_unlock(); // Bereich wieder freigeben.
-			
+
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
 		delay(100);
 	}
 	delay(100);
-	#endif
+#endif
 }
 void loop_OLED()
 {
-	#ifndef REGION_Serielle_Menue_Navigation
+#ifndef REGION_Serielle_Menue_Navigation
 	// Falls keine Taster zum Steuern fuer das Menue vorhanden sind, kann das Menue ueber die Serielle Schnittstelle gesteuert werden.
 	if (Serial.available() > 0)
 	{
@@ -330,10 +339,10 @@ void loop_OLED()
 			gMenue.BACK();
 		}
 	}
-	#endif
+#endif
 
 	int lMachineState = getMachineState(); // globale Variable lokal Speichern, damit diese sich lokal waehrend diesem Durchlauf nicht mehr aendert.
-	#ifndef REGION_Bestellnummern
+#ifndef REGION_Bestellnummern
 	if (lMachineState == MachineState_NormalMode_Bestellnummern)
 	{ // 
 		DettacheInterrupts(); // Interrupts verhindern
@@ -354,8 +363,8 @@ void loop_OLED()
 		AttacheInterrupts(); // Interrupts aktivieren
 		delay(100);
 	}
-	#endif
-	#ifndef REGION_Statistik
+#endif
+#ifndef REGION_Statistik
 	if (lMachineState >= 0)
 	{
 		if (lMachineState == MachineState_NormalMode_Statistik)
@@ -389,7 +398,7 @@ void loop_OLED()
 		gMenue.mSelectedMenueItem->mSelectedIndex = 0; // mSelectedIndex auf 0 setzen.
 		MyMutex_MenueItems_unlock(); // Bereich wieder freigeben.
 	}
-	#endif
+#endif
 
 	gMenue.showMenue(); // Informationen des Menues an Display uebergeben
 	gOLED.DisplayLines(); // Informationen anzeigen.
@@ -397,6 +406,274 @@ void loop_OLED()
 
 }
 
+
+#ifdef OPERATION_MODE_CM_IOT
+void loop_RFID(RFID rfid1)
+{
+
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	gCocktailMixer.mRotateTable.goToFirstPosition();
+	RfidData readData;
+	eRFIDErrorcode status = RFID_OK;
+	eRFIDStateMachine RFIDSystemState = RFID_Idle;
+	RFID::Uid lastUID;
+	RFID::MIFARE_Key stdKey;
+	RFID::MIFARE_Key secretKey;
+	byte identicalUIDBytes = 0;
+	uint32_t notificationValue = 0; //unused but requiered for task notifications
+	int retries = 5;
+	for (int i = 0; i < 6; i++) {			// Generating RFID sector keys
+		stdKey.keyByte[i] = 0xFF;
+		secretKey.keyByte[i] = 0xFF - i;
+	}
+	readData.Status = 0xF1;
+
+	while (true)
+	{
+		switch (RFIDSystemState)
+		{
+		case RFID_Idle:
+			if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
+				Serial.println("RFID: New Tag present");
+				if (rfid1.PICC_ReadCardSerial()) {		//read card serial
+					status = RFID_OK;
+					RFIDSystemState = RFID_Reading;
+					Serial.println("RFID: Got UID");
+				}
+				else {
+					status = RFID_FCARDSERIAL;
+					RFIDSystemState = RFID_DisplayError;	// Goto Error
+				}
+			}
+			else
+				I2Ctwo.begin(4, 5, 200000);
+				vTaskDelay(200 / portTICK_RATE_MS); // Pause Task for 30ms
+			break;
+		case RFID_Reading:
+			Serial.println("RFID: Reading");
+
+			identicalUIDBytes = 0;
+			Serial.print("RFID: TAG UID SIZE");
+			Serial.println(rfid1.uid.size);
+			
+			for (int i = 0; i < rfid1.uid.size; i++) { //compare last RFID tag to new RFID tag. Prevent reading the same tag.
+				if (lastUID.uidByte[i] == rfid1.uid.uidByte[i]) {
+					identicalUIDBytes++;
+				}
+				Serial.print(lastUID.uidByte[i]);
+				Serial.print(" ");
+				Serial.println(rfid1.uid.uidByte[i]);
+				lastUID.uidByte[i] = rfid1.uid.uidByte[i]; //Update the last seen RFID Tag ID
+			}
+			if (identicalUIDBytes == rfid1.uid.size)	// if all sectors are identical
+			{
+				status = RFID_FUIDIDENTICAL;
+				RFIDSystemState = RFID_DisplayError;	// goto Error
+				Serial.print("Identical bytes: ");
+				Serial.println(identicalUIDBytes);
+			}
+			else
+			{
+				status = RFID_OK;
+			}
+
+			
+
+			
+			if (status == RFID_OK) {
+				retries = 5;
+				do { // Retry reading data several times.
+					status = RFID_OK;
+					Serial.println("RFID: Reading Loop");
+
+					if (status == RFID_OK && !rfid1.getDrinkStatus(readData.Status, &secretKey)) {
+						status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
+						RFIDSystemState = RFID_DisplayError;
+					}
+					else if (readData.Status != 0xFF)
+					{
+						status = RFID_FWRONGSTATUS;
+						RFIDSystemState = RFID_DisplayError;
+						retries = 0; // Status is incorrect. Break out of loop and change to the next glass.
+					}
+					Serial.print("RFID: STATUS = 0x");
+					Serial.println(readData.Status, HEX);
+
+					if (status == RFID_OK && !rfid1.readData(readData, &stdKey)) {		// can't read complete dataset
+						status = RFID_FDATAREAD;
+						RFIDSystemState = RFID_DisplayError;
+					}
+
+					if (status == RFID_OK && !rfid1.setDrinkStatus(0x00, &secretKey)) {		// cannot write tag
+						status = RFID_FWRITECARD;
+						RFIDSystemState = RFID_DisplayError;
+					}
+
+					if (status == RFID_OK) {
+						lastUID = rfid1.uid;	//update UID to current UID
+						RFIDSystemState = RFID_Filling;
+					}
+					else
+						vTaskDelay(30 / portTICK_RATE_MS); // if sth. failed, wait 30ms until next try
+				} while (--retries > 0 && status != RFID_OK);
+			}
+			rfid1.PICC_HaltA();
+			rfid1.PCD_StopCrypto1();
+
+
+			break;
+		case RFID_RotateTable:
+			gCocktailMixer.mRotateTable.goToNextPosition();
+			Serial.println("RFID: Waiting Position shift to finish");
+			if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+				ULONG_MAX, /* Reset the notification value to 0 on exit. */
+				&notificationValue, /* Notified value pass out in notificationValue. */
+				5000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+				!= pdTRUE) {
+
+				Serial.println("RFID: Table has not reached next position within 5 seconds.");
+				RFIDSystemState = RFID_Idle;
+			}
+			else {
+			Serial.println("RFID: Position shift finished");
+			RFIDSystemState = RFID_Idle;	// Return to Idle and wait for new tag
+			}
+			break;
+		case RFID_Filling:
+			gCocktailMixer.mRotateTable.goToNextPosition();
+			Serial.println("RFID: Waiting Position shift to finish");
+			if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+				ULONG_MAX, /* Reset the notification value to 0 on exit. */
+				&notificationValue, /* Notified value pass out in notificationValue. */
+				5000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+				!= pdTRUE) {
+
+				Serial.println("RFID: Table has not reached next position within 5 seconds.");
+				RFIDSystemState = RFID_Idle;
+			}
+			else {
+				Serial.println("RFID: Position shift finished. Start mixing...");
+
+				if (status == RFID_OK && !rfid1.addDrinkToMixerQueue(readData)) {	// unable to add order to mixer queue
+					status = RFID_FMIXERQUEUE;
+				}
+				Serial.println("RFID: Waiting for mixer");
+
+				if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+					ULONG_MAX, /* Reset the notification value to 0 on exit. */
+					&notificationValue, /* Notified value pass out in notificationValue. */
+					10000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+					!= pdTRUE) {
+
+					Serial.println("RFID: Mixing is not done within 10 seconds.");
+					RFIDSystemState = RFID_Idle;
+				}
+				else {
+					if (notificationValue == FILLING_GLASS_NOT_EMPTY) { // This part returns the Glass to the RFID tag, restores the status
+						Serial.println("RFID: Glass is not empty! Fixing  status"); // and return the glass to the filling position
+						gCocktailMixer.mRotateTable.goToPrevPosition();
+						if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+							ULONG_MAX, /* Reset the notification value to 0 on exit. */
+							&notificationValue, /* Notified value pass out in notificationValue. */
+							10000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+							!= pdTRUE) {
+							Serial.println("Could not find previous position!");
+						}
+						else {
+							byte RestoreStatus = 0xFF;
+							retries = 10;
+							do {
+								if (status == RFID_OK && !rfid1.setDrinkStatus(RestoreStatus, &secretKey)) {		// cannot write tag
+									status = RFID_FWRITECARD;
+									RFIDSystemState = RFID_DisplayError;
+								}
+								if (status == RFID_OK && !rfid1.getDrinkStatus(RestoreStatus, &secretKey)) {
+									status = RFID_FDRINKSTATUS;		// Drink status cannot be obtained
+									RFIDSystemState = RFID_DisplayError;
+								}
+								if (status != RFID_OK)						//Wait 50ms for next retry
+									vTaskDelay(50 / portTICK_PERIOD_MS);  
+
+							} while (--retries > 0 && RestoreStatus == 0xFF);
+							gCocktailMixer.mRotateTable.goToNextPosition();
+							if (xTaskNotifyWait(0x00,      /* Don't clear any notification bits on entry. */
+								ULONG_MAX, /* Reset the notification value to 0 on exit. */
+								&notificationValue, /* Notified value pass out in notificationValue. */
+								10000 / portTICK_RATE_MS)  /* Block for 3 seconds. */
+								!= pdTRUE) {
+								Serial.println("Could not find next position!");
+							}
+							RFIDSystemState = RFID_CheckForWaitingGlass;
+
+						}
+					}
+					else if (notificationValue == FILLING_OK) {
+
+						Serial.println("RFID: Mixing finished");
+						RFIDSystemState = RFID_CheckForWaitingGlass;
+					}
+					else
+						Serial.println("RFID: Filling notification value unknown!");
+				}
+			}
+			break;
+
+		case RFID_CheckForWaitingGlass:
+
+			retries = 5;
+			while (retries-- > 5 && RFIDSystemState == RFID_Filling) {		// check for five times, break if state has changed to read
+				if (rfid1.PICC_IsNewCardPresent()) { //check if any cards are present. Must be in the standby mode (not halt mode)
+					Serial.println("RFID: New tag present. Start reading...");
+					status = RFID_OK;
+					RFIDSystemState = RFID_Reading;
+				}
+				else
+					vTaskDelay(10 / portTICK_RATE_MS); // if read failed, pause for 10 ms
+				retries++;
+			}
+			if (RFIDSystemState != RFID_Reading)
+				RFIDSystemState = RFID_RotateTable;
+
+		case RFID_DisplayError:
+			switch (status)
+			{
+			case RFID_FCARDSERIAL:		// Failed to read current card serial
+				Serial.println("RFID: Can't read serial of current card");
+				break;
+			case RFID_FUIDIDENTICAL:	// UID matches last UID -> card read twice
+				Serial.println("RFID: Tag identical with previous card. Insert new glass.");
+				break;
+			case RFID_FDRINKSTATUS:		// Can't read drink status
+				Serial.println("RFID: Can't read drink status value.");
+				break;
+			case RFID_FWRONGSTATUS:		// Unexpected Status
+				Serial.println("RFID: Wrong drink status received. Drink might be already served or area is corrupted.");
+				break;
+			case RFID_FDATAREAD:		// Failed to read RFID data
+				Serial.println("RFID: Failed to read RFID sectors.");
+				break;
+			case RFID_FMIXERQUEUE:		// Unable to add order to mixer queue
+				Serial.println("RFID: Unable to append drink to mixer queue.");
+				break;
+			case RFID_FWRITECARD:		// Exception while trying to write the card
+				Serial.println("RFID: Error updating tag.");
+				break;
+			case RFID_SELECTFAILED:
+				Serial.println("RFID: Error selecting Tag.");
+				break;
+			}
+
+			status = RFID_OK;			// Reset msg report, rotate one position and wait for new tag
+			RFIDSystemState = RFID_RotateTable;
+			break;
+		default:
+			Serial.println("RFID: SM entered an undefined state! Returning to Idle...");
+			RFIDSystemState = RFID_Idle;
+			break;
+		}
+	}
+}
+#endif
 
 
 void WriteDefaultConfigFile()
@@ -483,7 +760,7 @@ void LoadConfigFile(String pFileName)
 	{
 		Line = vector<String>(); // Line leeren. (damit keine Eintraege mehr vorhanden sind)
 		Counter++;
-		#ifndef REGION_Select
+#ifndef REGION_Select
 		// Hier wird geprueft, an welcher Stelle in der Datei man sich befindet, damit man weiss, was mit dem Inhalt anzufangen ist.
 		if (Lines[i] == "Vorrarsbehaelter")
 		{
@@ -520,7 +797,7 @@ void LoadConfigFile(String pFileName)
 			Serial.println(SelectIndex);
 			Counter = -2; // -2: "Cocktails_Alkoholfrei", -1: Erleuterungen; 0: Erster Eintrag welcher zu verwerten ist.
 		}
-		#endif
+#endif
 
 		if (SelectIndex == 0 && Counter >= 0)
 		{ // Vorratsbehaelter
@@ -557,7 +834,7 @@ void LoadConfigFile(String pFileName)
 		{ // Cocktails alkoholisch
 			// Zeilenaufbau: Cocktailname; Zutat_1; Menge_1; Zutat_2; Menge_2; ...
 			split(&Lines[i], ';', &Line); // Zeileninhalt trennen
-			
+
 			vector<String> lNames;
 			vector<int> lAmount;
 			for (int i = 0; i < (Line.size() - 1) / 2; i++)
@@ -647,7 +924,7 @@ void create_Menue()
 	Serial.println("MixHit_0 - Einstellungen_0");
 	gMenue.selectMenueItem(lSelectedPath_00, 2);
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Fuellmaengen", NO_OPERATION));
-	
+
 	Serial.println("MixHit_0 - Einstellungen_0 - Fuellmaengen_1");
 	int lSelectedPath_001[] = { 0, 0, 1 }; // MixHit_0 - Einstellungen_0 - Fuellmaengen_1
 	gMenue.selectMenueItem(lSelectedPath_001, 3);
@@ -724,7 +1001,7 @@ void create_Menue()
 	int lSelectedPath_01[] = { 0, 1 }; // MixHit_0 - Betriebsmodus_1
 	gMenue.selectMenueItem(lSelectedPath_01, 2);
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Normalbetrieb", NormalMode));
-	
+
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Normalbetrieb_0");
 	int lSelectedPath_010[] = { 0, 1, 0 }; // MixHit_0 - Betriebsmodus_1 - Normalbetrieb_0
 	gMenue.selectMenueItem(lSelectedPath_010, 3);
@@ -811,7 +1088,7 @@ void create_Menue()
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Komponententest_1");
 	gMenue.selectMenueItem(lSelectedPath_011, 3);
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Waage", TestMode_Scale));
-	
+
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Komponententest_1 - Waage_2");
 	int lSelectedPath_0112[] = { 0, 1, 1, 2 }; // MixHit_0 - Betriebsmodus_1 - Komponententest_1 - Valve_1
 	gMenue.selectMenueItem(lSelectedPath_0112, 4);
@@ -848,7 +1125,7 @@ void refreshReservoirInfo()
 	for (int i = 0; i < Lines.size(); i++)
 	{
 		Counter++;
-		#ifndef REGION_Select
+#ifndef REGION_Select
 		// Hier wird geprueft, an welcher Stelle in der Datei man sich befindet, damit man weiss, was mit dem Inhalt anzufangen ist.
 		if (Lines[i] == "Vorrarsbehaelter")
 		{
@@ -861,7 +1138,7 @@ void refreshReservoirInfo()
 		{ // Sobald der Inhalt Glaeser ist, sind alle Vorratsbehaelter vorbei und es kann abgebrochen werden.
 			break;
 		}
-		#endif
+#endif
 
 		if (SelectIndex == 0 && Counter >= 0)
 		{ // Vorratsbehaelter

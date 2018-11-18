@@ -2,11 +2,13 @@
   "ExpandedNodes": [
     "",
     "\\MixHit",
-    "\\MixHit\\src\\mixer",
-    "\\MixHit\\src\\mixer\\collections",
-    "\\MixHit\\src\\web",
-    "\\MixHit\\src\\web\\sites"
+    "\\MixHit\\src",
+    "\\MixHit\\src\\driver",
+    "\\MixHit\\src\\driver\\RFID",
+    "\\MixHit\\src\\driver\\RFID\\LL",
+    "\\MixHit\\src\\libs",
+    "\\MixHit\\src\\mixer"
   ],
-  "SelectedNode": "\\MixHit\\MixHit.vcxproj",
+  "SelectedNode": "\\MixHit\\src\\driver\\RFID\\LL\\MFRC522.h",
   "PreviewInSolutionExplorer": false
 }

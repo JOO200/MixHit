@@ -3,6 +3,7 @@ cOLED gOLED;
 
 cOLED::cOLED()
 {
+	MyMutex_I2C_lock(); // I2C Bus sperren (der IO-Expander verwendet ebenfalls I2C).
 	mdisplay.begin(SSD1306_SWITCHCAPVCC, I2C_OLEDaddress);
 	mdisplay.display();
 	delay(2000);
@@ -16,6 +17,7 @@ cOLED::cOLED()
 	mdisplay.println("Booting...");
 	mdisplay.display();
 	mNewValue = false;
+	MyMutex_I2C_unlock(); // I2C freigeben
 }
 void cOLED::DisplayLines()
 {

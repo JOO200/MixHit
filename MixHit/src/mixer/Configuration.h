@@ -16,6 +16,65 @@ extern cOLED gOLED;							// Bekanntmachen der Objekte
 extern cCocktailList gAlcoholicList;		// Bekanntmachen der Objekte
 extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
 
+/*******************************************************************************************
+*	DEFINE REGION CM-operating mode
+*	this define changes the software fundamentally.
+*	It either works in IOT Mode or "normal" mode
+*
+*
+***************************************/
+//#define OPERATION_MODE_CM_100
+#define OPERATION_MODE_CM_IOT
+
+
+ /*Define Pins and enums if CM is in IOT mode*/
+#ifdef OPERATION_MODE_CM_IOT
+extern TaskHandle_t RFIDTask;
+extern SemaphoreHandle_t i2cSemaphore;
+
+
+#define RFID_READER_ADDR 0x28
+#define RFID_READER_RST 15
+
+
+enum eRFIDStateMachine
+{
+	RFID_Idle,				// Idle state, waiting for new card
+	RFID_RotateTable,		// Rotate table
+	RFID_Reading,			// Supervise table rotation
+	RFID_Filling,			// Mixing Cocktail
+	RFID_CheckForWaitingGlass, //check if a new glass is ready
+	RFID_DisplayError		// Display error messages of SM
+};
+
+enum eRFIDErrorcode
+{
+	RFID_OK,				// Everything ok
+	RFID_FCARDSERIAL,		// Failed to read current card serial
+	RFID_FUIDIDENTICAL,		// UID matches last UID -> card read twice
+	RFID_FDRINKSTATUS,		// Can't read drink status
+	RFID_FWRONGSTATUS,		// Unexpected Status
+	RFID_FDATAREAD,			// Failed to read RFID data
+	RFID_FMIXERQUEUE,		// Unable to add order to mixer queue
+	RFID_FWRITECARD,		// Exception while trying to write the card
+	RFID_SELECTFAILED		// Could not select the found PICC
+};
+
+
+enum eRFIDTaskNotifications {
+	ROTATE_OK,
+	FILLING_OK,
+	ROTATE_FAIL,
+	FILLING_GLASS_NOT_EMPTY
+
+};
+
+#endif
+
+
+#define I2C_SX1509address 0x3E
+#define I2C_OLEDaddress 0x78//0x3C
+
 #ifndef REGION_MixHit_Infos
 #ifndef FillSIZE
 #define ORDER_BIG 2
@@ -51,11 +110,18 @@ extern cCocktailList gNonAlcoholicList;		// Bekanntmachen der Objekte
 #define PinScaleData 25
 #define PinScaleCLK 26
 
-#define PinMotor 14
+#define PinPwm 14
 #define PinDrehrichtung 12
 #define PinMagnetTaster 23
+#define DelayAnlauframpe 500							// Angabe in µs
+
+#define PWM_FREQUENCY 5000								// PWM-Frequenz
+#define CHANNEL 7										// Channel
+#define RESOLUTION 8									// Resolution
 
 #define PinServoPWM 32
+#define ServoPosAktiv 20
+#define ServoPosDeaktiv 170
 
 #define PinSX1509Valve_0 7 
 #define PinSX1509Valve_1 0
@@ -69,6 +135,12 @@ extern const int PinSX1509Valve[MaxNumberOfReservoir];
 
 #define I2C_SX1509address 0x3E
 #define I2C_OLEDaddress 0x3C
+
+
+#define RFID_READER_ADDR 0x28
+#define RFID_READER_RST 15 //CHANGE THIS!
+
+
 
 #endif
 #ifndef REGION_MachineStates

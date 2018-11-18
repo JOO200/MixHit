@@ -12,12 +12,15 @@
 #include "../driver/FileOperations.h"
 #include "../libs/MyMath.h"
 #include "obj/cGlass.h"
+#include "../driver/RFID/RFID.h"
 
 
 
 void setup_CocktailMixer();	// Wird beim Start des ESP32 ausgefuehrt.
 void loop_CocktailMixer();	// Wird in einer Dauerschleife zyklisch aufgerufen.
 void loop_OLED();			// Wird in einer Dauerschleife zyklisch aufgerufen.
+void loop_RFID(RFID rfid1);			// Wird in einer Dauerschleife zyklisch aufgerufen.
+
 
 void create_Menue();						// Erstellt das Menue welches auf dem OLED-Dysplay angezeigt wird.
 void WriteDefaultConfigFile();				// Schreibt die Daten in die /Default_Config.txt
