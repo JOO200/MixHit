@@ -339,10 +339,12 @@ int cCocktailMixer::mixNextCocktail()
 			}
 		}
 		MyMutex_mQueue_lock(); // Bereich fuer andere Threads sperren
+#ifdef OPERATION_MODE_CM_100 //If Cocktail could not be mixed, RFID tasks handle the issue.
 		if (lReturnValue < 0) // Falls die Bestellung nicht ordentlich ausgefuehrt werden konnte.
 		{ // Bei einem Fehler wird die Bestellung wieder eingereiht (wieder an vorderster Stelle).
 			mQueue[lOrder.getPrio()].addOrder_FirstPlace(lOrder);
 		}
+#endif
 		MyMutex_mQueue_unlock(); // Bereich wieder freigeben.
 		return lReturnValue; // Rueckgabewert zurueckgeben.
 	}
