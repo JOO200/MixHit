@@ -4,10 +4,6 @@
  Author:	User
 */
 
-//#include <BluetoothSerial.h>
-//#include <SPIFFS.h>
-//#include <SparkFunSX1509.h>
-//#include <Wire.h>
 #include <dummy.h>
 //#include "WiFi.h"
 #include "src/mixer/Main_CocktailMixer.h"
@@ -17,6 +13,7 @@
 #include "src/config/WiFiConfig.h"
 #include "src/include/WiFi.h"
 #include "src/config/ConfigProvider.h"
+
 
 void loop_1(void * pvParameters);
 void loop_3(void * pvParameters);
@@ -60,15 +57,12 @@ void setup_WebServer()
 // the setup function runs once when you press reset or power the board
 void setup() 
 {
-	#ifndef REGION_Serial_Start
+#ifndef REGION_Serial_Start
 	Serial.begin(115200);
-	while (!Serial)
-	{
-		;
-	}
+	while (!Serial);
 	Serial.println("Serial_OK");
-	#endif
-	#ifndef REGION_SPIFFS_Start
+#endif
+#ifndef REGION_SPIFFS_Start
 	if (!SPIFFS.begin()) // Prueft, ob SPIFFS gestartet werden kann
 	{ // Konnte nicht gestartet werden. Dies kann z.B. passieren, wenn auf dem verwendeten Controler noch kein SPIFFS vorhanden war.
 		delay(1000);
@@ -80,10 +74,7 @@ void setup()
 		}
 	}
 	Serial.println("SPIFFS_OK");
-	String lFiles = "";
-	listDir(SPIFFS, "/", 2, &lFiles);
-	Serial.println(lFiles);
-	#endif
+#endif
 	ConfigProvider::init();
 	String lWerkseinstellungen = "";
 	readFile(SPIFFS, "/Werkseinstellungen.xtxt", &lWerkseinstellungen);
@@ -95,7 +86,7 @@ void setup()
 		gOLED.PrintFirstLine("Werkseinstellungen...");
 		gOLED.DisplayLines();
 #define REGION_DeleteAllFiles
-		#ifndef REGION_DeleteAllFiles
+#ifndef REGION_DeleteAllFiles
 		String lFiles = "";
 		listDir(SPIFFS, "/", 0, &lFiles);
 		vector<String> lFileNames;
@@ -104,7 +95,7 @@ void setup()
 		{
 			deleteFile(SPIFFS, lFileNames[i]);
 		}
-		#endif
+#endif
 		WriteDefaultConfigFile();
 		writeFile(SPIFFS, "/Config_Select.txt", "/Default_Config.txt"); // Default_Config als zu ladende Datei festlegen
 		writeFile(SPIFFS, "/Config_Select.wtxt", "/Default_Config.wtxt"); // Default_Config als zu ladende Datei festlegen
@@ -118,14 +109,12 @@ void setup()
 	gOLED.DisplayLines();
 	setup_WebServer();
 	setup_CocktailMixer();
-		
-	i2cSemaphore = xSemaphoreCreateBinary();
 
 
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
 #ifdef OPERATION_MODE_CM_IOT
-	
+
 	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, &RFIDTask, 0);
 #endif
 
@@ -135,8 +124,9 @@ void setup()
 // the loop function runs over and over again until power down or reset
 void loop() 
 {
-	delay(100);// loop_WebServer();
+	vTaskDelay(100);// loop_WebServer();
 }
+
 void loop_1(void * pvParameters)
 {
 	while (true)
@@ -169,7 +159,7 @@ void loop_4(void * pvParameters)
 	Serial.println(version,HEX);
 	if (version == (byte)0x92) {
 		loop_RFID(rfid1);
-		
+
 	}
 	else {
 		Serial.println("RFID: reader version unknown!");
@@ -181,9 +171,9 @@ void loop_4(void * pvParameters)
 		vTaskDelay(100);
 	}
 
-	
 
-		
+
+
 
 }
 #endif

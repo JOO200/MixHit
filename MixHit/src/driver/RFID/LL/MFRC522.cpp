@@ -3,6 +3,7 @@
 * NOTE: Please also check the comments in MFRC522.h - they provide useful hints and background information.
 * Released into the public domain.
 */
+#ifdef OPERATION_MODE_CM_IOT
 
 #include <Arduino.h>
 #include "MFRC522.h"
@@ -1744,3 +1745,4 @@ bool MFRC522::PICC_ReadCardSerial() {
 	MFRC522::StatusCode result = PICC_Select(&uid);
 	return (result == STATUS_OK);
 } // End 
+#endif

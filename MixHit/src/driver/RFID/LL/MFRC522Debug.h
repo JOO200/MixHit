@@ -1,4 +1,5 @@
 #include "MFRC522.h"
+#include "WString.h"
 
 #ifndef MFRC522Debug_h
 #define MFRC522Debug_h

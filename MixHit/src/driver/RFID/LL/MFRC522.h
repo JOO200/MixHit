@@ -73,6 +73,7 @@
  * 		Pages 44-47 Authentication key 
  */
 #ifndef MFRC522_h
+#ifdef OPERATION_MODE_CM_IOT
 #define MFRC522_h
 
 #include "require_cpp11.h"
@@ -430,4 +431,5 @@ protected:
 	StatusCode MIFARE_TwoStepHelper(byte command, byte blockAddr, int32_t data);
 };
 
+#endif
 #endif

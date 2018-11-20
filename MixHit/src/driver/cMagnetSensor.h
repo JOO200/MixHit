@@ -16,4 +16,4 @@ private:
 	int mPinNumber;						// PinNummer an dem Der Magnetsensor angeschlossen ist.
 };
 
-#endif
+#endif // _CMAGNETSENSOR_H_

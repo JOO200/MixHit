@@ -4,6 +4,7 @@
 //#include "../mixer/Configuration.h"
 //#include "I2C.h"
 #include "LL/MFRC522.h"
+#include <stdint.h>
 
 #define THRESHOLD_BIG_SMALL_COCKTAIL 200		// Threshold for cocktail size: over -> big cocktail, under -> small cocktail;
 

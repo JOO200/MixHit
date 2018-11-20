@@ -175,7 +175,6 @@ bool RFID::setDrinkStatus(uint8_t status, MIFARE_Key *secretKey)
 
 bool RFID::changeSecretKey(MIFARE_Key *oldKey, MIFARE_Key *newKey) {
 
-
 	StatusCode auth_status;
 	uint8_t buffer[18];
 	uint8_t size = 16;

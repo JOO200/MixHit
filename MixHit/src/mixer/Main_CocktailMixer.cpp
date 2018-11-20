@@ -17,17 +17,9 @@ extern TwoWire I2Ctwo;
 cCocktailMixer gCocktailMixer;
 bool LogActive = false;
 
-//i2c_t *hi2c1;
-
-
 void setup_CocktailMixer()
 {
-#ifndef LoadFile
-
-
-	//hi2c1 = i2cInit(0,22,21,20000);
-	//i2cFlush(hi2c1);
-
+	#ifndef LoadFile
 	String lConfigFileName = "";
 	readFile(SPIFFS, "/Config_Select.txt", &lConfigFileName); // Liest ein, welche Config-Datei geladen werden soll.
 	if (lConfigFileName == "")
@@ -38,7 +30,7 @@ void setup_CocktailMixer()
 	writeFile(SPIFFS, "/Config_Select.txt", "/Default_Config.txt");	// Zur�cksetzen auf Default (dass falls die aktuelle Config beschaedigt ist, nach einem Reset wieder die Default geladen wird - Damit der Controler nicht staendeig die fehlerhafte Datei laed und resetet).
 	LoadConfigFile(lConfigFileName);
 	writeFile(SPIFFS, "/Config_Select.txt", lConfigFileName); // Falls beim Laden alles in Ordnung war (und das Programm nicht abstuerzt) wird die Config_Select wieder auf den Urspruenglichen Wert gesetzt.
-#endif	
+#endif
 #ifndef REGON_Menue
 	create_Menue();
 	Serial.println("Menue_OK");
@@ -135,7 +127,7 @@ void loop_CocktailMixer()
 		if (lMachineState == MachineState_Betriebsmodus)
 		{
 			gOLED.PrintFirstLine("");
-			delay(100);
+			vTaskDelay(100);
 		}
 #endif
 #ifndef REGION_InitAll
@@ -227,7 +219,7 @@ void loop_CocktailMixer()
 			}
 			gCocktailMixer.mServo.Aktivieren();
 			gOLED.PrintFirstLine("Geschlossen");
-			delay(100);
+			vTaskDelay(100);
 		}
 #endif
 #ifndef REGION_TestMode_ValveOpen
@@ -238,7 +230,7 @@ void loop_CocktailMixer()
 				gCocktailMixer.mValveControl.setValveState(i, i == gMenue.mSelectedMenueItem->mSelectedIndex); // Falls im Menue das aktuelle Ventil ausgewaehlt ist, wird das Ventil geoeffnet, andernfalls geschlossen
 			}
 			gOLED.PrintFirstLine("Offen");
-			delay(100);
+			vTaskDelay(100);
 		}
 		else if (lOldMachineState == MachineState_TestMode_ValveOpen)
 		{ // Falls ein anderer Modus gewaehlt wurde und zuvor der Testmodus fuer die Ventile aktiv war.
@@ -259,7 +251,7 @@ void loop_CocktailMixer()
 			Serial.println(Scale_Weight);
 			gOLED.PrintFirstLine("Gewicht: " + String(Scale_Weight) + "g"); // Anzeigen des Gewichtes in der ersten Zeile des Displays
 			setMachineState(MachineState_TestMode_Scale);
-			delay(100);
+			vTaskDelay(100);
 		}
 #endif
 #ifndef REGION_TestMode_Scale
@@ -269,7 +261,7 @@ void loop_CocktailMixer()
 			double Scale_Weight = gCocktailMixer.mScale.getWeight(); // Speichern des Gewichtswertes
 			Serial.println(Scale_Weight);
 			gOLED.PrintFirstLine("Gewicht: " + String(Scale_Weight) + "g"); // Anzeigen des Gewichtes in der ersten Zeile des Displays
-			delay(100);
+			vTaskDelay(100);
 		}
 #endif
 #ifndef REGION_TestMode_Servo0
@@ -289,7 +281,7 @@ void loop_CocktailMixer()
 		{ // Falls der TestModus aktiv ist, aber nichts ausgewaehlt wurde.
 			gOLED.PrintFirstLine("Test_Mode");
 			CloseValvesStopMotor(); // Alle Ventile schlie�en udn Motor stoppen.
-			delay(100);
+			vTaskDelay(100);
 		}
 #endif
 	}
@@ -309,9 +301,9 @@ void loop_CocktailMixer()
 			if (getMachineState() == lMachineState) // Pruefen, ob sich inzwischen keine Aenderung ergeben hat.
 				setMachineState(lMachineState); // Um den Alten Maschienenstatus zu ueberschreiben.
 		}
-		delay(100);
+		vTaskDelay(100);
 	}
-	delay(100);
+	vTaskDelay(100);
 #endif
 }
 void loop_OLED()
@@ -361,7 +353,7 @@ void loop_OLED()
 		}
 		MyMutex_MenueItems_unlock(); // Bereich freigeben
 		AttacheInterrupts(); // Interrupts aktivieren
-		delay(100);
+		vTaskDelay(100);
 	}
 #endif
 #ifndef REGION_Statistik
@@ -402,7 +394,7 @@ void loop_OLED()
 
 	gMenue.showMenue(); // Informationen des Menues an Display uebergeben
 	gOLED.DisplayLines(); // Informationen anzeigen.
-	delay(100); // TODO: Testen, ob der delay Auswirkungen auf den Webserver hat.
+	vTaskDelay(100); // TODO: Testen, ob der delay Auswirkungen auf den Webserver hat.
 
 }
 
@@ -455,7 +447,7 @@ void loop_RFID(RFID rfid1)
 			identicalUIDBytes = 0;
 			Serial.print("RFID: TAG UID SIZE");
 			Serial.println(rfid1.uid.size);
-			
+
 			for (int i = 0; i < rfid1.uid.size; i++) { //compare last RFID tag to new RFID tag. Prevent reading the same tag.
 				if (lastUID.uidByte[i] == rfid1.uid.uidByte[i]) {
 					identicalUIDBytes++;
@@ -477,9 +469,9 @@ void loop_RFID(RFID rfid1)
 				status = RFID_OK;
 			}
 
-			
 
-			
+
+
 			if (status == RFID_OK) {
 				retries = 5;
 				do { // Retry reading data several times.
@@ -592,7 +584,7 @@ void loop_RFID(RFID rfid1)
 									RFIDSystemState = RFID_DisplayError;
 								}
 								if (status != RFID_OK)						//Wait 50ms for next retry
-									vTaskDelay(50 / portTICK_PERIOD_MS);  
+									vTaskDelay(50 / portTICK_PERIOD_MS);
 
 							} while (--retries > 0 && RestoreStatus == 0xFF);
 							gCocktailMixer.mRotateTable.goToNextPosition();
@@ -1144,7 +1136,7 @@ void refreshReservoirInfo()
 		if (SelectIndex == 0 && Counter >= 0)
 		{ // Vorratsbehaelter
 			Lines[i] = String(gCocktailMixer.mReservoir.getReservoirName(Counter).c_str())
-				+ ";" + String(gCocktailMixer.mReservoir.getM(Counter)) 
+				+ ";" + String(gCocktailMixer.mReservoir.getM(Counter))
 				+ ";" + String(gCocktailMixer.mReservoir.getB(Counter)); // Parameter m und b in die aktuelle Zeile uebernehmen.
 		}
 	}
