@@ -5,15 +5,15 @@
 #define ORDER_HALF 1
 #endif
 
-cOrder::cOrder()
+cOrder::cOrder():mCocktail("", 0)
 {
 	mOrderNumber = 0;
 	mOrderedAmount = ORDER_FULL;
 	mPrio = 0;
 }
-cOrder::cOrder(cCocktail pCocktail, int pOrderedAmount, int pPrio)
+
+cOrder::cOrder(cCocktail pCocktail, int pOrderedAmount, int pPrio):mCocktail(pCocktail)
 {
-	mCocktail = pCocktail;
 	mOrderNumber = -1; // Default auf Fehlermeldung. Die Bestellnummer wird spaeter gesetzt, sobald die Bestellung in der Liste hinugefuegt wird.
 	mOrderedAmount = pOrderedAmount;
 	mPrio = pPrio;

@@ -375,7 +375,7 @@ void loop_OLED()
 			int lNumberOfMaxSigns = 9;
 			for (int i = 0; i < gCocktailMixer.mReservoir.getNumberOfReservoir(); i++)
 			{
-				String lName = gCocktailMixer.mReservoir.getReservoirName(i);
+				String lName = String(gCocktailMixer.mReservoir.getReservoirName(i).c_str());
 				String lSum = String(gCocktailMixer.mReservoir.getSum(i));
 				if (gCocktailMixer.mReservoir.getReservoirName(i).length() > lNumberOfMaxSigns)
 				{
@@ -756,6 +756,7 @@ void LoadConfigFile(String pFileName)
 	Serial.print("Lines_Lenght: ");
 	Serial.println(Lines.size());
 	vector<String> Line;
+	/*
 	for (int i = 0; i < Lines.size(); i++)
 	{
 		Line = vector<String>(); // Line leeren. (damit keine Eintraege mehr vorhanden sind)
@@ -804,7 +805,7 @@ void LoadConfigFile(String pFileName)
 			split(&Lines[i], ';', &Line); // Zeileninhalt trennen
 			if (Line.size() == 1) // Pruefen ob nur der Name des Vorratsbehaelters enthalten ist
 			{
-				gCocktailMixer.mReservoir.addReservoir(Line[0]);
+				//gCocktailMixer.mReservoir.addReservoir(Line[0]);
 			}
 			else if (Line.size() == 3) // Pruefen ob der Name des Vorratsbehaelters sowie die Parameter m und b enthalten sind
 			{
@@ -881,7 +882,7 @@ void LoadConfigFile(String pFileName)
 				gNonAlcoholicList.addCocktail(new cCocktail(Line[0], lNames, lAmount));
 			}
 		}
-	}
+	}*/
 }
 void create_Menue()
 {
@@ -905,7 +906,7 @@ void create_Menue()
 	gMenue.selectMenueItem(lSelectedPath_0000, 4);
 	for (int i = 0; i < gCocktailMixer.mReservoir.getNumberOfReservoir(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(i + 1) + " " + gCocktailMixer.mReservoir.getReservoirName(i), NO_OPERATION));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(i + 1) + " " + String(gCocktailMixer.mReservoir.getReservoirName(i).c_str()), NO_OPERATION));
 	}
 	Serial.println("MixHit_0 - Einstellungen_0 - Reservoir_0");
 	gMenue.selectMenueItem(lSelectedPath_000, 3);
@@ -918,7 +919,7 @@ void create_Menue()
 
 	for (int i = 0; i < gCocktailMixer.mReservoir.getNumberOfReservoir(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(i + 1) + " " + gCocktailMixer.mReservoir.getReservoirName(i), Config_InitSingle));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(i + 1) + " " + String(gCocktailMixer.mReservoir.getReservoirName(i).c_str()), Config_InitSingle));
 	}
 
 	Serial.println("MixHit_0 - Einstellungen_0");
@@ -958,7 +959,7 @@ void create_Menue()
 	gMenue.selectMenueItem(lSelectedPath_0030, 4);
 	for (int i = 0; i < gAlcoholicList.getAmountOfCocktailsInList(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(gAlcoholicList.getCocktail(i).getCocktailName(), NO_OPERATION));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(gAlcoholicList.getCocktail(i).getCocktailName().c_str()), NO_OPERATION));
 	}
 
 	Serial.println("MixHit_0 - Einstellungen_0 - Cocktails_3");
@@ -970,7 +971,7 @@ void create_Menue()
 	gMenue.selectMenueItem(lSelectedPath_0031, 4);
 	for (int i = 0; i < gNonAlcoholicList.getAmountOfCocktailsInList(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(gNonAlcoholicList.getCocktail(i).getCocktailName(), NO_OPERATION));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(gNonAlcoholicList.getCocktail(i).getCocktailName().c_str()), NO_OPERATION));
 	}
 
 	Serial.println("MixHit_0 - Einstellungen_0");
@@ -1026,7 +1027,7 @@ void create_Menue()
 	gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem("Mixed Cocktails: ", NO_OPERATION));
 	for (int i = 0; i < gCocktailMixer.mReservoir.getNumberOfReservoir(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(gCocktailMixer.mReservoir.getReservoirName(i) + ": ", NO_OPERATION));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(gCocktailMixer.mReservoir.getReservoirName(i).c_str()) + ": ", NO_OPERATION));
 	}
 
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Normalbetrieb_0");
@@ -1043,7 +1044,7 @@ void create_Menue()
 	gMenue.selectMenueItem(lSelectedPath_01020, 5);
 	for (int i = 0; i < gAlcoholicList.getAmountOfCocktailsInList(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(gAlcoholicList.getCocktail(i).getCocktailName(), NormalMode_OrderCocktailAlcohol));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(gAlcoholicList.getCocktail(i).getCocktailName().c_str()), NormalMode_OrderCocktailAlcohol));
 	}
 
 	Serial.println("MixHit_0 - Betriebsmodus_1 - Normalbetrieb_0 - Bestellung aufgeben_2");
@@ -1055,7 +1056,7 @@ void create_Menue()
 	gMenue.selectMenueItem(lSelectedPath_01021, 5);
 	for (int i = 0; i < gNonAlcoholicList.getAmountOfCocktailsInList(); i++)
 	{
-		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(gNonAlcoholicList.getCocktail(i).getCocktailName(), NormalMode_OrderCocktailNonAlcohol));
+		gMenue.addSubMenueItemToSelectedMenueItem(new cMenueItem(String(gNonAlcoholicList.getCocktail(i).getCocktailName().c_str()), NormalMode_OrderCocktailNonAlcohol));
 	}
 
 	Serial.println("MixHit_0 - Betriebsmodus_1");
@@ -1142,7 +1143,9 @@ void refreshReservoirInfo()
 
 		if (SelectIndex == 0 && Counter >= 0)
 		{ // Vorratsbehaelter
-			Lines[i] = gCocktailMixer.mReservoir.getReservoirName(Counter) + ";" + String(gCocktailMixer.mReservoir.getM(Counter)) + ";" + String(gCocktailMixer.mReservoir.getB(Counter)); // Parameter m und b in die aktuelle Zeile uebernehmen.
+			Lines[i] = String(gCocktailMixer.mReservoir.getReservoirName(Counter).c_str())
+				+ ";" + String(gCocktailMixer.mReservoir.getM(Counter)) 
+				+ ";" + String(gCocktailMixer.mReservoir.getB(Counter)); // Parameter m und b in die aktuelle Zeile uebernehmen.
 		}
 	}
 

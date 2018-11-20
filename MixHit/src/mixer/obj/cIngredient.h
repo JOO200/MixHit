@@ -1,7 +1,6 @@
 #ifndef _CZUTATEN_H_
 #define _CZUTATEN_H_
 
-#include "Arduino.h"
 #include "../Configuration.h"
 #include "../../libs/MyString.h"
 

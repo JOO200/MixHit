@@ -1,6 +1,6 @@
 #include "RFID.h"
 #include "Wire.h"
-#include "../MixHit/src/mixer/cCocktailMixer.h"
+#include "../../mixer/cCocktailMixer.h"
 //#include "../MixHit/src/mixer/cCocktailMixer.h"		//include Queue of Orders class to wrap RFID data
 //#include "../MixHit/src/mixer/Main_CocktailMixer.h"	//Quick and dirty bugfix for error "vector elements not found"
 
@@ -214,6 +214,7 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 	String CocktailName = "";
 	vector<String> CocktailNames;
 	vector<int> IngriedentsAmounts;
+	vector<cIngredient> ingredients;
 	int OrderedAmount;						// 1: half, 2: full
 	int OrderPrio = 2;// (data.Status & 0xFF);	// get the upper 8 bits of status
 	int recvdOrderNr;
@@ -233,36 +234,44 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 			switch (i)							// check which reservoir is looked at currently
 			{
 			case 0:
-				CocktailNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));	// hand over the amount of ingredient
+//				CocktailNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));	// hand over the amount of ingredient
+				ingredients.push_back(cIngredient("Ananas", int(data.mlProFlasche[i])));
 				break;
 			case 1:
-				CocktailNames.push_back("Maracuja");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Maracuja");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Maracuja", int(data.mlProFlasche[i])));
 				break;
 			case 2:
-				CocktailNames.push_back("Malibu");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Malibu");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Malibu", int(data.mlProFlasche[i])));
 				break;
 			case 3:
-				CocktailNames.push_back("Wodka");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Wodka");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Wodka", int(data.mlProFlasche[i])));
 				break;
 			case 4:
-				CocktailNames.push_back("Zitrone");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Zitrone");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Zitrone", int(data.mlProFlasche[i])));
 				break;
 			case 5:
-				CocktailNames.push_back("Grenadine");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Grenadine");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Grenadine", int(data.mlProFlasche[i])));
 				break;
 			case 6:
-				CocktailNames.push_back("Orange");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Orange");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Orange", int(data.mlProFlasche[i])));
 				break;
 			case 7:
-				CocktailNames.push_back("Banane");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+//				CocktailNames.push_back("Banane");
+//				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+				ingredients.push_back(cIngredient("Banane", int(data.mlProFlasche[i])));
 				break;
 			}
 		}
@@ -276,9 +285,8 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 	total_ml < THRESHOLD_BIG_SMALL_COCKTAIL ? OrderedAmount = 1 : OrderedAmount = 2;
 
 	//Step 1: wrap RFID data in Cocktail class structure
-	cCocktail lCocktail(CocktailName,		// name of cocktail
-		CocktailNames,						// names of ingridients
-		IngriedentsAmounts);
+	cCocktail lCocktail = cCocktail(CocktailName.c_str(),		// name of cocktail
+		ingredients, total_ml);
 	
 
 	//Step 2: create an cOrder-object out of lCocktail

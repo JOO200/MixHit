@@ -7,8 +7,8 @@
 #include <Arduino.h>
 #include "MFRC522.h"
 #include "MFRC522Debug.h"
-#include "src/libs/MyMutex.h"
-#include "./src/mixer/Configuration.h"
+#include "../../../libs/MyMutex.h"
+#include "../../../mixer/Configuration.h"
 
 extern TwoWire I2Ctwo;
 /////////////////////////////////////////////////////////////////////////////////////

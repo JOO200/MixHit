@@ -5,6 +5,7 @@
 #include "../libs/MyString.h"
 #include "../mixer/Configuration.h"
 #include "../driver/cOLED.h"
+#include <string>
 
 class cMenueItem;
 
@@ -15,6 +16,7 @@ class cMenueItem
 public:
 	cMenueItem();											// Standartkonstruktor
 	cMenueItem(String pName, OK_Function pOK_Function);		// Konstruktor mit Informationen
+	//cMenueItem(std::string pName, OK_Function pOK_Function);		// Konstruktor mit Informationen
 	String getSubmenueItemName(int pIndex);					// Gibt den Namen des Submenueitems (eine Ebene tiefer) an der angegebenen Stelle aus.
 	String getNextMenueItemName(int pIndex);				// Gibt den Namen des Menueitems (in der selben Ebene (layer)) an der gegebenen Stelle aus.
 	cMenueItem* getSubmenueItem(int pIndex);				// Gibt die Adresse des Submenueitems (eine Ebene tiefer) an der gegebenen Stelle aus.

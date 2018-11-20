@@ -2,18 +2,26 @@
 #define _CCOCKTAIL_H_
 
 #include "cIngredient.h"
-#include "../Configuration.h"
+#include <string>
+#include <vector>
 
 class cCocktail
 {
 public:
-	cCocktail();									// Standatkonstruktor
-	cCocktail(String pCocktailName, vector<String> pNames, vector<int> pAmounts); // Konstruktor mit Informationen
-	String getCocktailName();						// Gibt den Namen des Cocktails aus.
+	cCocktail(std::string pCocktailName, int pFuel);
+	cCocktail(std::string pCocktailName, std::vector<cIngredient> pIngredients, int pFuel);
+	std::string getCocktailName();						// Gibt den Namen des Cocktails aus.
 	int getNumberOfIngredients();					// Gibt die Anzahl an verwendeten Zutaten aus.
 	cIngredient getIngredient(int pIndex);			// Gibt die Zutat mit dem entsprechenden Index aus.
+
+	static cCocktail * fromJson(std::string json);
+	std::string toJson();
+
+	int getFuel();
+
 private:
-	vector<cIngredient> mIngredients;				// Verwendete Zutaten.
-	String mCocktailName;							// Name des Cocktails
+	std::vector<cIngredient> mIngredients;				// Verwendete Zutaten.
+	std::string mCocktailName;							// Name des Cocktails
+	int mFuel;
 };
 #endif

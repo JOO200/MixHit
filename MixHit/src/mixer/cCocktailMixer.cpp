@@ -353,8 +353,8 @@ int cCocktailMixer::mixNextCocktail()
 }
 int cCocktailMixer::mixCocktail(cOrder pBestellung)
 {
-	Serial.println("Mix: " + pBestellung.getCocktail().getCocktailName());
-	gOLED.PrintFirstLine("Mix: " + pBestellung.getCocktail().getCocktailName());
+	Serial.println("Mix: %s" + String(pBestellung.getCocktail().getCocktailName().c_str()));
+	gOLED.PrintFirstLine("Mix: %s" + String(pBestellung.getCocktail().getCocktailName().c_str()));
 	mCurrentOrderNumber = pBestellung.getOrderNumber(); // Letzte bearbeitete Bestellnummer aktuallisieren.
 	int lSlotNumber;
 	int lGlassIndex;
@@ -387,7 +387,7 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 			lTimes[i] = mReservoir.AmountToTime(lReservoirIndices[i], lSingleAmount); // Oeffnungszeit des Ventiles zur angegebenen Maenge ermitteln.
 		}
 		cCocktail myCocktail = pBestellung.getCocktail();
-		String myCocktailName = myCocktail.getCocktailName();
+		String myCocktailName = String(myCocktail.getCocktailName().c_str());
 		Serial.printf("$LOG;%s;%s;%s;%s;%s;%s;%s;%s;%s&\r\n", myCocktailName.c_str(), String(lAmount[0]).c_str(), String(lAmount[1]).c_str(), String(lAmount[2]).c_str(), String(lAmount[3]).c_str(), String(lAmount[4]).c_str(), String(lAmount[5]).c_str(), String(lAmount[6]).c_str(), String(lAmount[7]).c_str());
 
 
@@ -402,7 +402,7 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 		Serial.println("Weight Difference: " + String(lEndWeight - lStartWeight));
 		// Check Weight ... return 0 wenn Ok, -2 falls nicht OK (Vorratsbehaelter leer)
 		mSlotOrderNumber[lSlotNumber - 1] = pBestellung.getOrderNumber(); // -1, da lSlotNumber bei 1 beginnt. Bestellnummer dem Slot zuordnen, in dem der Cocktail gemixt wurde.
-		mSlotCocktailName[lSlotNumber - 1] = pBestellung.getCocktail().getCocktailName(); // -1, da lSlotNumber bei 1 beginnt. Cocktailname dem Slot zuordnen, in dem der Cocktail gemixt wurde.
+		mSlotCocktailName[lSlotNumber - 1] = String(pBestellung.getCocktail().getCocktailName().c_str()); // -1, da lSlotNumber bei 1 beginnt. Cocktailname dem Slot zuordnen, in dem der Cocktail gemixt wurde.
 		
 #ifdef OPERATION_MODE_CM_100 //Remove Rotation in IOT mode. --> controlled by RFID task
 		mRotateTable.goToNextPosition(); // Drehteller eine Position weiter rotieren.
@@ -421,7 +421,7 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 }
 int cCocktailMixer::mixCocktail_TEST(cCocktail pCocktail)
 {
-	Serial.println(pCocktail.getCocktailName());
+	Serial.println(pCocktail.getCocktailName().c_str());
 	int lNumberOfIngredients = pCocktail.getNumberOfIngredients();
 	int lValveIndices[MaxNumberOfReservoir];
 	long lTimes[MaxNumberOfReservoir];

@@ -11,11 +11,14 @@
 #include <dummy.h>
 //#include "WiFi.h"
 #include "src/mixer/Main_CocktailMixer.h"
-#include "src/web/Main_WebServer.h"
+#include "src/web/MyWebServer.h"
+#include "src/web/ConfigServer.h"
 #include "src/driver/RFID/RFID.h"
+#include "src/config/WiFiConfig.h"
+#include "src/include/WiFi.h"
+#include "src/config/ConfigProvider.h"
 
 void loop_1(void * pvParameters);
-void loop_2(void * pvParameters);
 void loop_3(void * pvParameters);
 
 #ifdef OPERATION_MODE_CM_IOT
@@ -23,6 +26,36 @@ void loop_4(void * pvParameters);
 TaskHandle_t RFIDTask;
 SemaphoreHandle_t i2cSemaphore;
 #endif
+
+void setup_WebServer()
+{
+	// First setup WiFi: Load the config and setup the wifi.
+	Serial.println("WiFiConfig");
+	std::string configPath = ConfigProvider::getPath(eConfig_WiFi);
+	if (configPath == "") {
+		Serial.println("WlanConfig nicht gefunden.");
+		return;
+	}
+	WiFiConfig * wifiConfig = WiFiConfig::fromFile(configPath);
+	if (wifiConfig == NULL) {
+		Serial.println("Fehler bei WLAN-Setup");
+		return;
+	}
+	Serial.println("WiFi");
+	AdvWiFi * wifi = new AdvWiFi();
+	Serial.println("WiFi setup");
+	wifiConfig->handleWiFi(wifi);
+
+	// Now start the WebServer:
+	Serial.println("WebServer setup");
+	MyWebServer * webServer = new MyWebServer();
+	webServer->start();
+
+	Serial.println("WebServer setup");
+	// And now start the WebServer for the configuration. Note: Port is 8080
+	ConfigServer * configServer = new ConfigServer();
+	configServer->start();
+}
 
 // the setup function runs once when you press reset or power the board
 void setup() 
@@ -47,7 +80,11 @@ void setup()
 		}
 	}
 	Serial.println("SPIFFS_OK");
+	String lFiles = "";
+	listDir(SPIFFS, "/", 2, &lFiles);
+	Serial.println(lFiles);
 	#endif
+	ConfigProvider::init();
 	String lWerkseinstellungen = "";
 	readFile(SPIFFS, "/Werkseinstellungen.xtxt", &lWerkseinstellungen);
 	Serial.println(lWerkseinstellungen);
@@ -57,6 +94,7 @@ void setup()
 		Serial.println("Lade Werkseinstellungen");
 		gOLED.PrintFirstLine("Werkseinstellungen...");
 		gOLED.DisplayLines();
+#define REGION_DeleteAllFiles
 		#ifndef REGION_DeleteAllFiles
 		String lFiles = "";
 		listDir(SPIFFS, "/", 0, &lFiles);
@@ -67,9 +105,7 @@ void setup()
 			deleteFile(SPIFFS, lFileNames[i]);
 		}
 		#endif
-		WriteBootstrap();
 		WriteDefaultConfigFile();
-		WriteDefaultWiFiConfig();
 		writeFile(SPIFFS, "/Config_Select.txt", "/Default_Config.txt"); // Default_Config als zu ladende Datei festlegen
 		writeFile(SPIFFS, "/Config_Select.wtxt", "/Default_Config.wtxt"); // Default_Config als zu ladende Datei festlegen
 		writeFile(SPIFFS, "/Werkseinstellungen.xtxt", "no");	
@@ -82,13 +118,11 @@ void setup()
 	gOLED.DisplayLines();
 	setup_WebServer();
 	setup_CocktailMixer();
-	 
 		
 	i2cSemaphore = xSemaphoreCreateBinary();
 
 
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
-	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
 #ifdef OPERATION_MODE_CM_IOT
 	
@@ -110,18 +144,7 @@ void loop_1(void * pvParameters)
 		loop_CocktailMixer();
 	}
 }
-void loop_2(void * pvParameters)
-{
-	while (true)
-	{
-		loop_WebServer();
-		/*if (WiFi.status() != WL_CONNECTED)
-		{
-			delay(500);
-			setup_WebServer();
-		}*/
-	}
-}
+
 void loop_3(void * pvParameters)
 {
 	while (true)

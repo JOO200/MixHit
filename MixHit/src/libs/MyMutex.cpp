@@ -16,7 +16,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "MyMutex.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "src/mixer/Configuration.h"
+#include "../mixer/Configuration.h"
 #include "esp32-hal-i2c.h"
 
 
