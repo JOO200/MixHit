@@ -394,10 +394,11 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 
 
 		gOLED.PrintFirstLine("Cocktail mixen");
+		mServo.Reset();
 		mServo.Aktivieren();
-		gCocktailMixer.WaitMillis(1000);
+		gCocktailMixer.WaitMillis(500);
 		mValveControl.setValveState(lReservoirIndices, lTimes, lNumberOfIngredients); // Liste der Ventile und Zeiten an die Ventilsteuerung uebergeben.
-		WaitMillis(2000);//DEFAULT 1000
+		WaitMillis(1000);//DEFAULT 1000
 		mServo.Deaktivieren();
 		mAmountOfMixedCocktails++; // Anzahl an gemixten Cocktails erhoehen (fuer die Statistik).
 		double lEndWeight = mScale.getWeight(); // Endgewicht ermitteln

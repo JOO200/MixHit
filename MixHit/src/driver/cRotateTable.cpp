@@ -113,7 +113,7 @@ bool cRotateTable::goToNextPosition()
 				Serial.println("FoundNextPosition");
 				mCurrentPosition = (mCurrentPosition % NumberOfSlotsRotateTable) + 1; // Position um eins erhoehen (Werte: 1 ... NumberOfSlotsRotateTable)
 				//delay(700); // 0,5sec weiter drehen, damit die Position stimmt.
-				//vTaskDelay(700 / portTICK_RATE_MS);
+				vTaskDelay(120 / portTICK_RATE_MS);
 				mMotor.MotorStop();
 				//mMotor.MotorStartL(); // Zurueck drehen damit Glas frei steht
 				//delay(200);
@@ -163,9 +163,12 @@ bool cRotateTable::goToPrevPosition()
 				//delay(700); // 0,5sec weiter drehen, damit die Position stimmt.
 				//vTaskDelay(700 / portTICK_RATE_MS);
 				mMotor.MotorStop();
-				//mMotor.MotorStartL(); // Zurueck drehen damit Glas frei steht
-				//delay(200);
-				//vTaskDelay(100 / portTICK_RATE_MS);
+				mMotor.MotorStartR(); // Zurueck drehen damit Glas frei steht
+				vTaskDelay(80 / portTICK_RATE_MS);
+				mMotor.MotorStop();
+				
+
+				mMotor.MotorStop();
 #ifdef OPERATION_MODE_CM_IOT //Wakeup RFID task when rotation is done
 				xTaskNotify(RFIDTask, ROTATE_OK, eSetValueWithOverwrite);
 #endif

@@ -112,19 +112,12 @@ bool interlockedExchange_4(bool v)
 void MyMutex_I2C_lock()
 {
 
-	//do {} while (xSemaphoreTake(i2cSemaphore, portMAX_DELAY) != pdPASS);
-	//I2C_MUTEX_LOCK();
-	//xSemaphoreTake(i2cSemaphore,1000/portTICK_RATE_MS);
-	
-	
-	//Serial.println("MutexLocked");
 	bool prev;
 	while (1)
 	{
 		while (mIsLocked_4) {};
 
 		prev = interlockedExchange_4(true);
-		//vTaskPrioritySet(NULL, 5);
 		if (!prev)
 			break;
 	}
@@ -132,12 +125,7 @@ void MyMutex_I2C_lock()
 }
 void MyMutex_I2C_unlock()
 {
-	//xSemaphoreGive(i2cSemaphore);
-	//xSemaphoreGive(i2cSemaphore);
-	//Serial.println("Mutex Unlocked");
-	interlockedExchange_4(false);
-	//vTaskPrioritySet(NULL, 1);
-	
+	interlockedExchange_4(false);	
 }
 
 bool interlockedExchange_5(bool v)

@@ -33,6 +33,7 @@ extern TaskHandle_t RFIDTask;
 extern SemaphoreHandle_t i2cSemaphore;
 
 
+
 #define RFID_READER_ADDR 0x28
 #define RFID_READER_RST 15
 

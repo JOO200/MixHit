@@ -53,6 +53,7 @@ void readFile(fs::FS &fs, const char * path, String* pContent)
 	{
 		(*pContent) += (char)file.read();
 	}
+
 }
 void readLine(fs::FS &fs, const char * path, String* pContent)
 {

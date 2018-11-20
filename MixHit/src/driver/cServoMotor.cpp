@@ -17,3 +17,10 @@ void cServoMotor::Deaktivieren()
 {
 	mServo.write(ServoPosDeaktiv);               //Winkelposition in Grad (°) wird angefahren   
 }
+
+void cServoMotor::Reset() {
+	mServo.detach();
+	mServo.attach(mPinNummer);
+	Aktivieren();
+
+}

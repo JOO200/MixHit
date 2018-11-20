@@ -1,5 +1,7 @@
 #include "cOLED.h"
+#include "Wire.h"
 cOLED gOLED;
+
 
 cOLED::cOLED()
 {
@@ -32,6 +34,11 @@ void cOLED::DisplayLines()
 		MyMutex_mLinesToShow_unlock(); // Bereich wieder freigeben
 
 		MyMutex_I2C_lock(); // I2C Bus sperren (der IO-Expander verwendet ebenfalls I2C).
+		Wire.reset();
+		Wire.begin();
+		vTaskDelay(15 / portTICK_RATE_MS);
+
+
 		mdisplay.clearDisplay(); // Display leeren.
 		mdisplay.setCursor(0, 0); // Cursor an die erste Stelle setzen.
 		for (int i = 0; i < OLED_MAX_ZEILEN; i++)

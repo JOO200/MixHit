@@ -84,7 +84,6 @@ void setup()
 	setup_CocktailMixer();
 	 
 		
-	i2cSemaphore = xSemaphoreCreateBinary();
 
 
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
@@ -92,7 +91,7 @@ void setup()
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
 #ifdef OPERATION_MODE_CM_IOT
 	
-	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, &RFIDTask, 0);
+	xTaskCreatePinnedToCore(loop_4, "RFID", 4096, NULL, 1, &RFIDTask, 1);
 #endif
 
 	Wire.setClock(200000);

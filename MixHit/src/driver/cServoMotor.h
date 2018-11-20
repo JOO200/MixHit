@@ -11,6 +11,7 @@ public:
 	cServoMotor(int pServoPin);
 	void Aktivieren();
 	void Deaktivieren();
+	void Reset();
 private:
 	int mPinNummer;
 	Servo mServo;

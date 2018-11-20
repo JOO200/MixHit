@@ -85,7 +85,7 @@ void cValveControl::setValveState(int pValveIndices[], long pTime[], int pNumber
 			Serial.print(String(lIndex) + ": Ende: ");
 			Serial.print(lIndex);
 			Serial.print(" -  Ist_Zeit_Differenz: ");
-			Serial.println(pTime[lIndex] - (millis() - StartTimes[lIndex] - 1));
+			Serial.println((int16_t)((int16_t)pTime[lIndex] - (millis() - (int16_t)StartTimes[lIndex] - 1)),DEC);
 		}
 		delay(1);
 		lIndex = (lIndex + 1) % pNumberOfIngredients; // lIndex um eins erhoehen (Falls lIndex >= pNumberOfIngredients --> lIndex = 0)
