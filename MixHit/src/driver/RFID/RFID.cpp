@@ -212,7 +212,7 @@ bool RFID::changeSecretKey(MIFARE_Key *oldKey, MIFARE_Key *newKey) {
 bool RFID::addDrinkToMixerQueue(RfidData &data)
 {
 	String CocktailName = "";
-	vector<String> CocktailNames;
+	vector<String> IngredientNames;
 	vector<int> IngriedentsAmounts;
 	int OrderedAmount;						// 1: half, 2: full
 	int OrderPrio = 2;// (data.Status & 0xFF);	// get the upper 8 bits of status
@@ -233,35 +233,35 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 			switch (i)							// check which reservoir is looked at currently
 			{
 			case 0:
-				CocktailNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
+				IngredientNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));	// hand over the amount of ingredient
 				break;
 			case 1:
-				CocktailNames.push_back("Maracuja");
+				IngredientNames.push_back("Maracuja");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			case 2:
-				CocktailNames.push_back("Malibu");
+				IngredientNames.push_back("Malibu");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			case 3:
-				CocktailNames.push_back("Wodka");
+				IngredientNames.push_back("Wodka");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			case 4:
-				CocktailNames.push_back("Zitrone");
+				IngredientNames.push_back("Zitrone");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			case 5:
-				CocktailNames.push_back("Grenadine");
+				IngredientNames.push_back("Grenadine");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			case 6:
-				CocktailNames.push_back("Orange");
+				IngredientNames.push_back("Orange");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			case 7:
-				CocktailNames.push_back("Banane");
+				IngredientNames.push_back("Banane");
 				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
 				break;
 			}
@@ -277,7 +277,7 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 
 	//Step 1: wrap RFID data in Cocktail class structure
 	cCocktail lCocktail(CocktailName,		// name of cocktail
-		CocktailNames,						// names of ingridients
+		IngredientNames,					// names of ingridients
 		IngriedentsAmounts);
 	
 
