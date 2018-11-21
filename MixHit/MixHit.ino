@@ -87,7 +87,7 @@ void setup()
 
 
 	xTaskCreatePinnedToCore(loop_1, "MixHit", 8192, NULL, 1, NULL, 1);
-	xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
+	//xTaskCreatePinnedToCore(loop_2, "WEB", 16384, NULL, 1, NULL, 0);
 	xTaskCreatePinnedToCore(loop_3, "OLED", 4096, NULL, 1, NULL, 0);
 #ifdef OPERATION_MODE_CM_IOT
 	
@@ -113,7 +113,7 @@ void loop_2(void * pvParameters)
 {
 	while (true)
 	{
-		loop_WebServer();
+		//loop_WebServer();
 		/*if (WiFi.status() != WL_CONNECTED)
 		{
 			delay(500);

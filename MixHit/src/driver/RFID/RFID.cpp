@@ -228,42 +228,51 @@ bool RFID::addDrinkToMixerQueue(RfidData &data)
 
 	for (int i = 0; i < 8; i++)					// create the vectors
 	{
-		if (data.mlProFlasche != 0)				// if the ingredient gets used in this cocktail
+		if (data.mlProFlasche[i] != 0)				// if the ingredient gets used in this cocktail
 		{
-			switch (i)							// check which reservoir is looked at currently
-			{
-			case 0:
-				IngredientNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));	// hand over the amount of ingredient
-				break;
-			case 1:
-				IngredientNames.push_back("Maracuja");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
-			case 2:
-				IngredientNames.push_back("Malibu");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
-			case 3:
-				IngredientNames.push_back("Wodka");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
-			case 4:
-				IngredientNames.push_back("Zitrone");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
-			case 5:
-				IngredientNames.push_back("Grenadine");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
-			case 6:
-				IngredientNames.push_back("Orange");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
-			case 7:
-				IngredientNames.push_back("Banane");
-				IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
-				break;
+				switch (i)							// check which reservoir is looked at currently
+				{
+				case 0:
+					Serial.println("Got Ananas");
+					IngredientNames.push_back("Ananas");	// the ingredient needs a name in order to be compared with the reservoir info
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));	// hand over the amount of ingredient
+					break;
+				case 1:
+					Serial.println("Got Maracuja");
+					IngredientNames.push_back("Maracuja");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				case 2:
+					Serial.println("Got Malibu");
+					IngredientNames.push_back("Malibu");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				case 3:
+					Serial.println("Got Wodka");
+					IngredientNames.push_back("Wodka");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				case 4:
+					Serial.println("Got Zitrone");
+					IngredientNames.push_back("Zitrone");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				case 5:
+					Serial.println("Got Grenadine");
+					IngredientNames.push_back("Grenadine");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				case 6:
+					Serial.println("Got Orange");
+					IngredientNames.push_back("Orange");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				case 7:
+					Serial.println("Got Banane");
+					IngredientNames.push_back("Banane");
+					IngriedentsAmounts.push_back((int(data.mlProFlasche[i])));
+					break;
+				
 			}
 		}
 	}

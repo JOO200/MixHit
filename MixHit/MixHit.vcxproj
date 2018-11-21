@@ -82,11 +82,74 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\**\*.h" />
+    <ClInclude Include="src\driver\cMagnetSensor.h" />
+    <ClInclude Include="src\driver\cMotor.h" />
+    <ClInclude Include="src\driver\cOLED.h" />
+    <ClInclude Include="src\driver\cRotateTable.h" />
+    <ClInclude Include="src\driver\cServoMotor.h" />
+    <ClInclude Include="src\driver\cValveControl.h" />
+    <ClInclude Include="src\driver\esp32-hal-ledc.h" />
+    <ClInclude Include="src\driver\FileOperations.h" />
+    <ClInclude Include="src\driver\I2C.h" />
+    <ClInclude Include="src\driver\RFID\LL\deprecated.h" />
+    <ClInclude Include="src\driver\RFID\LL\MFRC522.h" />
+    <ClInclude Include="src\driver\RFID\LL\MFRC522Debug.h" />
+    <ClInclude Include="src\driver\RFID\LL\MFRC522Extended.h" />
+    <ClInclude Include="src\driver\RFID\LL\require_cpp11.h" />
+    <ClInclude Include="src\driver\RFID\RFID.h" />
+    <ClInclude Include="src\driver\RFID\RFID_Errorcodes.h" />
+    <ClInclude Include="src\driver\RFID\RFID_StateMachine.h" />
+    <ClInclude Include="src\libs\cScale.h" />
+    <ClInclude Include="src\libs\MyMath.h" />
+    <ClInclude Include="src\libs\MyMutex.h" />
+    <ClInclude Include="src\libs\MyString.h" />
+    <ClInclude Include="src\mixer\cCocktailMixer.h" />
+    <ClInclude Include="src\mixer\collections\cCocktailList.h" />
+    <ClInclude Include="src\mixer\collections\cGlasses.h" />
+    <ClInclude Include="src\mixer\collections\cQueueOfOrders.h" />
+    <ClInclude Include="src\mixer\Configuration.h" />
+    <ClInclude Include="src\mixer\Main_CocktailMixer.h" />
+    <ClInclude Include="src\mixer\obj\cCocktail.h" />
+    <ClInclude Include="src\mixer\obj\cGlass.h" />
+    <ClInclude Include="src\mixer\obj\cIngredient.h" />
+    <ClInclude Include="src\mixer\obj\cOrder.h" />
+    <ClInclude Include="src\mixer\obj\cReservoir.h" />
+    <ClInclude Include="src\remote\cMenue.h" />
+    <ClInclude Include="src\remote\cMenueItem.h" />
+    <ClInclude Include="src\web\Main_WebServer.h" />
     <ClInclude Include="__vm\.MixHit.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\**\*.cpp" />
+    <ClInclude Include="src\driver\cMagnetSensor.cpp" />
+    <ClInclude Include="src\driver\cMotor.cpp" />
+    <ClInclude Include="src\driver\cOLED.cpp" />
+    <ClInclude Include="src\driver\cRotateTable.cpp" />
+    <ClInclude Include="src\driver\cServoMotor.cpp" />
+    <ClInclude Include="src\driver\cValveControl.cpp" />
+    <ClInclude Include="src\driver\FileOperations.cpp" />
+    <ClInclude Include="src\driver\I2C.cpp" />
+    <ClInclude Include="src\driver\RFID\LL\MFRC522.cpp" />
+    <ClInclude Include="src\driver\RFID\LL\MFRC522Debug.cpp" />
+    <ClInclude Include="src\driver\RFID\LL\MFRC522Extended.cpp" />
+    <ClInclude Include="src\driver\RFID\RFID.cpp" />
+    <ClInclude Include="src\libs\cScale.cpp" />
+    <ClInclude Include="src\libs\MyMath.cpp" />
+    <ClInclude Include="src\libs\MyMutex.cpp" />
+    <ClInclude Include="src\libs\MyString.cpp" />
+    <ClInclude Include="src\mixer\cCocktailMixer.cpp" />
+    <ClInclude Include="src\mixer\collections\cCocktailList.cpp" />
+    <ClInclude Include="src\mixer\collections\cGlasses.cpp" />
+    <ClInclude Include="src\mixer\collections\cQueueOfOrders.cpp" />
+    <ClInclude Include="src\mixer\Configuration.cpp" />
+    <ClInclude Include="src\mixer\Main_CocktailMixer.cpp" />
+    <ClInclude Include="src\mixer\obj\cCocktail.cpp" />
+    <ClInclude Include="src\mixer\obj\cGlass.cpp" />
+    <ClInclude Include="src\mixer\obj\cIngredient.cpp" />
+    <ClInclude Include="src\mixer\obj\cOrder.cpp" />
+    <ClInclude Include="src\mixer\obj\cReservoir.cpp" />
+    <ClInclude Include="src\remote\cMenue.cpp" />
+    <ClInclude Include="src\remote\cMenueItem.cpp" />
+    <ClInclude Include="src\web\Main_WebServer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

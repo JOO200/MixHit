@@ -387,6 +387,7 @@ int cCocktailMixer::mixCocktail(cOrder pBestellung)
 			Serial.println("Amount in ml " + String(lSingleAmount));
 			mReservoir.addToSum(lReservoirIndices[i], lSingleAmount); // Benoetigte Maenge in der Verbrauchsstatistik hinzufuegen.
 			lTimes[i] = mReservoir.AmountToTime(lReservoirIndices[i], lSingleAmount); // Oeffnungszeit des Ventiles zur angegebenen Maenge ermitteln.
+			
 		}
 		cCocktail myCocktail = pBestellung.getCocktail();
 		String myCocktailName = myCocktail.getCocktailName();
