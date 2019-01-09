@@ -1,5 +1,6 @@
 #include "cScale.h"
 
+
 cScale::cScale()
 {
 	mTare = 643, 4368;

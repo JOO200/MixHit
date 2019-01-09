@@ -1,7 +1,6 @@
 #include "RFID.h"
 #include "Wire.h"
-#include "../MixHit/src/mixer/cCocktailMixer.h"
-//#include "../MixHit/src/mixer/cCocktailMixer.h"		//include Queue of Orders class to wrap RFID data
+#include "../../mixer/cCocktailMixer.h"
 //#include "../MixHit/src/mixer/Main_CocktailMixer.h"	//Quick and dirty bugfix for error "vector elements not found"
 
 

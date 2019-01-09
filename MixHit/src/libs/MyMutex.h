@@ -17,7 +17,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define _MYMUTEX_H_
 
 #include <Arduino.h>
-
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "../mixer/Configuration.h"
+#include "esp32-hal-i2c.h"
 void MyMutex_mQueue_lock();
 void MyMutex_mLinesToShow_lock();
 void MyMutex_gMachineState_lock();
